@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import  start_client, close_client
 from contextlib import asynccontextmanager
+from app.routes.meds import meds_route 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +39,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+app.add_api_route(meds_route)
 # Endpoint raíz
 @app.get("/", tags=["Root"])
 async def read_root():
