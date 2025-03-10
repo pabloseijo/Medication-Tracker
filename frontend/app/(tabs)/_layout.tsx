@@ -1,9 +1,23 @@
-import { View, Text } from "react-native";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
-    <View className="flex-1 items-center justify-center bg-green-100">
-      <Text className="text-xl font-bold text-white">It works! 🎉</Text>
-    </View>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: "black", borderTopColor: "gray" },
+        tabBarActiveTintColor: "yellow",
+        tabBarInactiveTintColor: "gray",
+      }}
+    >
+      {/* Pestaña de Plan */}
+      <Tabs.Screen name="plan" options={{ tabBarLabel: "Plan" }} />
+
+      {/* Otras pestañas (puedes agregarlas después) */}
+      <Tabs.Screen name="database" options={{ tabBarLabel: "Base de Datos" }} />
+      <Tabs.Screen name="recipes" options={{ tabBarLabel: "Recetas" }} />
+      <Tabs.Screen name="teams" options={{ tabBarLabel: "Teams" }} />
+      <Tabs.Screen name="progress" options={{ tabBarLabel: "Progreso" }} />
+    </Tabs>
   );
 }
