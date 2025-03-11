@@ -2,7 +2,8 @@ import { SafeAreaView } from "react-native";
 import { ApplicationProvider, IconRegistry, Layout, Text } from "@ui-kitten/components";
 import * as eva from "@eva-design/eva";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
-import HomeScreen from "./screens/HomeScreen";
+import Navbar from "./components/Navbar";
+import "react-native-gesture-handler";
 
 import './global.css'
 
@@ -16,7 +17,7 @@ export default function App() {
       <ApplicationProvider {...eva} theme={eva.light}>
         <SafeAreaView style={{ flex: 1 }}>
           <Layout style={{ flex: 1 }}>
-            <HomeScreen />
+            <Navbar />
           </Layout>
         </SafeAreaView>
       </ApplicationProvider>
