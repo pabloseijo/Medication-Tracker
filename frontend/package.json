@@ -39,6 +39,6 @@
     "extends": "universe/native",
     "root": true
   },
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "App.tsx",
   "private": true
 }

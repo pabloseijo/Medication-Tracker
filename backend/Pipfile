@@ -12,6 +12,7 @@ motor = "*"
 bcrypt = "*"
 pypdf2 = "*"
 requests = "*"
+typesense = "*"
 
 [dev-packages]
 
