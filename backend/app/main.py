@@ -6,6 +6,7 @@ from app.routes.meds import meds_router
 from app.routes.user import user_router
 from app.services.typesense import create_meds_collection
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """

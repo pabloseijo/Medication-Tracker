@@ -25,7 +25,8 @@ services:
     depends_on:
       mongo: 
         condition: service_started
-
+      typesense: 
+        condition: service_started
 
   mongo:
     image: mongo:8.0
@@ -36,4 +37,13 @@ services:
       - MONGO_INITDB_DATABASE=${DATABASE_NAME}
     ports:
       - "27017:27017"
+
+  typesense:
+    image: typesense/typesense:0.24.1
+    container_name: typesense
+    environment:
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_DATA_DIR=/tmp
+    ports:
+      - "8108:8108"
 
