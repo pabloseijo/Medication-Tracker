@@ -13,6 +13,7 @@ async def read_root(code: str):
 
 
 
+# 🔎 Endpoint para autocompletado
 @meds_router.get("/search")
 def search_meds(q: str = Query(..., description="Nombre del medicamento")):
     results = search_medications(q)
@@ -20,8 +21,7 @@ def search_meds(q: str = Query(..., description="Nombre del medicamento")):
     return {"suggestions": suggestions}
 
 
-# 🔎 Endpoint para autocompletado
-@meds_router.get("/meds")
+@meds_router.get("/med_name")
 def autocomplete_meds(name: str):
     med = obtener_medicamento_por_nombre(name)
     return med

@@ -9,7 +9,6 @@ client = typesense.Client({
     "connection_timeout_seconds": 5
 })
 
-
 # Crear la colección de medicamentos en Typesense si no existe
 def create_meds_collection():
     collection_name = "medications"
@@ -19,17 +18,17 @@ def create_meds_collection():
 
     if collection_name in existing_collections:
         print(f"La colección '{collection_name}' ya existe. No se creará nuevamente.")
-        return
-
-    schema = {
-        "name": collection_name,
-        "fields": [
-            {"name": "name", "type": "string"},
-        ]
-    }
-
-    client.collections.create(schema)
-    print(f"Creada la colección '{collection_name}' exitosamente.")
+    else:
+        schema = {
+            "name": collection_name,
+            "fields": [
+                {"name": "name", "type": "string"},
+            ]
+        }
+        client.collections.create(schema)
+        print(f"Creada la colección '{collection_name}' exitosamente.")
+    
+    # Insertar medicamentos
     insert_meds()
 
 def insert_meds():

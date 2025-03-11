@@ -34,7 +34,7 @@ const SearchScreen = () => {
     setSuggestions([]); // Ocultar sugerencias después de buscar
 
     try {
-      const response = await fetch(`http://localhost:8000/meds?name=${query}`);
+      const response = await fetch(`http://localhost:8000/med_name?name=${query}`);
       const data = await response.json();
       setMedData(data);
     } catch (error) {
@@ -65,9 +65,9 @@ const SearchScreen = () => {
       {/* Información del medicamento */}
       {medData && (
         <View className="mt-5 p-4 bg-white rounded-lg shadow-md">
-          <Text className="text-lg font-bold">📌 Nombre: {medData.name}</Text>
-          <Text className="text-gray-600">📝 Descripción: {medData.description}</Text>
-          <Text className="text-gray-600">🏷️ Categoría: {medData.category}</Text>
+          <Text className="text-lg font-bold">📌 Nombre: {medData.nombre}</Text>
+          <Text className="text-gray-600">📝 Via: {medData.viasAdministracion[0].nombre}</Text>
+          <Text className="text-gray-600">🏷️ Categoría: {medData.formaFarmaceutica.nombre}</Text>
         </View>
       )}
 
