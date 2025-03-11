@@ -7,26 +7,24 @@ const { width, height } = Dimensions.get("window");
 // Definir el tipo para los eventos de la agenda
 interface AgendaItem {
   name: string;
-  time: string;
+  meal: "Desayuno" | "Comida" | "Cena"; // Ahora tiene categorías en lugar de horas
 }
+
 
 // Base de datos de eventos por día
 const eventsDatabase: { [key: string]: AgendaItem[] } = {
-  "2025-03-10": [{ name: "Meeting with client", time: "10:00 AM" }],
+  "2025-03-10": [
+    { name: "Tostadas y café", meal: "Desayuno" },
+    { name: "Pasta con ensalada", meal: "Comida" },
+    { name: "Sopa y pan", meal: "Cena" },
+  ],
   "2025-03-11": [
-    { name: "Team brainstorming session", time: "9:00 AM" },
-    { name: "NO", time: "3:00 PM" },
-    { name: "Webon", time: "5:00 PM" },
-  ],
-  "2025-03-12": [
-    { name: "Pablo Garcia Seijo", time: "9:00 AM" },
-    { name: "Project presentation", time: "2:00 PM" },
-  ],
-  "2025-03-13": [
-    { name: "Entrega Impactathon", time: "9:00 AM" },
-    { name: "Socrates Agudo Torrado", time: "4:00 PM" },
+    { name: "Huevos revueltos", meal: "Desayuno" },
+    { name: "Pollo asado", meal: "Comida" },
+    { name: "Pizza casera", meal: "Cena" },
   ],
 };
+
 
 const MyAgenda = () => {
   const [items, setItems] = useState<{ [key: string]: AgendaItem[] }>({});
@@ -36,7 +34,6 @@ const MyAgenda = () => {
     console.log("Cargando eventos para el día:", day.dateString);
 
     setItems((prevItems) => ({
-      ...prevItems,
       [day.dateString]: eventsDatabase[day.dateString] || [], // Cargar eventos si existen, si no, dejar vacío
     }));
   };
@@ -64,9 +61,10 @@ const MyAgenda = () => {
           renderItem={(item: AgendaItem) => (
             <View style={styles.item}>
               <Text style={styles.itemTitle}>{item.name}</Text>
-              <Text>{item.time}</Text>
+              <Text style={styles.mealText}>{item.meal}</Text> 
             </View>
           )}
+          
           renderEmptyData={renderEmptyData} // Muestra mensaje cuando no hay eventos
           theme={{
             agendaDayTextColor: "blue",
@@ -120,6 +118,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingTop: Platform.OS === "ios" ? 40 : 0, // Ajusta el espacio para el notch en iPhone
   },
+  mealText: {
+    fontSize: 14,
+    fontStyle: "italic",
+    color: "gray",
+  },  
 });
 
 export default MyAgenda;
