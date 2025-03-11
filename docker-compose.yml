@@ -20,6 +20,8 @@ services:
     ports:
       - "8000:8000"
     restart: always
+    env_file:
+      - .env
     depends_on:
       mongo: 
         condition: service_started
@@ -28,6 +30,8 @@ services:
   mongo:
     image: mongo:8.0
     container_name: mongo
+    env_file:
+      - .env
     environment:
       - MONGO_INITDB_DATABASE=${DATABASE_NAME}
     ports:

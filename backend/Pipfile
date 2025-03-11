@@ -6,12 +6,13 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = "*"
-pydantic = "*"
 python-dotenv = "*"
 motor = "*"
 bcrypt = "*"
 pypdf2 = "*"
 requests = "*"
+pydantic = {extras = ["email"], version = "*"}
+pyjwt = "*"
 typesense = "*"
 
 [dev-packages]
