@@ -1,0 +1,55 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=development
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      mongo: 
+        condition: service_started
+      typesense: 
+        condition: service_healthy
+
+  mongo:
+    image: mongo:8.0
+    container_name: mongo
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_DATABASE=${DATABASE_NAME}
+    ports:
+      - "27017:27017"
+
+  typesense:
+    image: typesense/typesense:28.0
+    container_name: typesense
+    environment:
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_DATA_DIR=/tmp
+      - TYPESENSE_ENABLE_CORS=true
+    ports:
+      - "8108:8108"
+    healthcheck:
+      test: ["CMD", "pgrep", "typesense"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
