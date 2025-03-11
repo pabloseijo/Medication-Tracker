@@ -1,5 +1,5 @@
-import useState from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, ActivityIndicator } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
 
@@ -45,57 +45,40 @@ const SearchScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 p-5 bg-gray-100">
       {/* Barra de búsqueda */}
-      <SearchBar query={query} setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} onSearch={fetchMedData} />
+      <SearchBar 
+        query={query} 
+        setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
+        onSearch={fetchMedData} 
+      />
 
       {/* Lista de sugerencias */}
-      <SuggestionsList suggestions={suggestions} onSelect={(name) => setQuery(name)} />
+      <SuggestionsList 
+        suggestions={suggestions} 
+        onSelect={(name) => setQuery(name)} 
+      />
 
       {/* Indicador de carga */}
-      {loading && <ActivityIndicator size="large" color="#007AFF" />}
+      {loading && <ActivityIndicator size="large" color="#007AFF" className="mt-4" />}
 
       {/* Información del medicamento */}
       {medData && (
-        <View style={styles.resultContainer}>
-          <Text style={styles.title}>📌 Nombre: {medData.name}</Text>
-          <Text>📝 Descripción: {medData.description}</Text>
-          <Text>🏷️ Categoría: {medData.category}</Text>
+        <View className="mt-5 p-4 bg-white rounded-lg shadow-md">
+          <Text className="text-lg font-bold">📌 Nombre: {medData.name}</Text>
+          <Text className="text-gray-600">📝 Descripción: {medData.description}</Text>
+          <Text className="text-gray-600">🏷️ Categoría: {medData.category}</Text>
         </View>
       )}
 
       {/* Mensaje de error si no se encuentra el medicamento */}
       {!loading && medData === null && query !== "" && (
-        <Text style={styles.errorText}>⚠️ Medicamento no encontrado</Text>
+        <Text className="mt-5 text-lg text-red-500 text-center">
+          ⚠️ Medicamento no encontrado
+        </Text>
       )}
     </View>
   );
 };
 
 export default SearchScreen;
-
-// 🎨 Estilos
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#F5F5F5",
-  },
-  resultContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  errorText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-  },
-});
