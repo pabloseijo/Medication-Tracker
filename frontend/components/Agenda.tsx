@@ -8,23 +8,36 @@ interface AgendaItem {
   time: string;
 }
 
-const MyCalendar = () => {
-  const [items, setItems] = useState<{ [key: string]: AgendaItem[] }>({
-    "2025-03-10": [{ name: "Meeting with client", time: "10:00 AM" }],
-    "2025-03-11": [
-      { name: "Team brainstorming session", time: "9:00 AM" },
-      { name: "NO", time: "2:00 PM" },
-      { name: "Webon", time: "5:00 PM" },
-    ],
-    "2025-03-12": [
-      { name: "Pablo Garcia Seijo", time: "9:00 AM" },
-      { name: "Project presentation", time: "2:00 PM" },
-    ],
-    "2025-03-13": [
-      { name: "Entrega Impactathon", time: "9:00 AM" },
-      { name: "Socrates Agudo Torrado", time: "2:00 PM" },
-    ],
-  });
+// Base de datos de eventos por día
+const eventsDatabase: { [key: string]: AgendaItem[] } = {
+  "2025-03-10": [{ name: "Meeting with client", time: "10:00 AM" }],
+  "2025-03-11": [
+    { name: "Team brainstorming session", time: "9:00 AM" },
+    { name: "NO", time: "3:00 PM" },
+    { name: "Webon", time: "5:00 PM" },
+  ],
+  "2025-03-12": [
+    { name: "Pablo Garcia Seijo", time: "9:00 AM" },
+    { name: "Project presentation", time: "2:00 PM" },
+  ],
+  "2025-03-13": [
+    { name: "Entrega Impactathon", time: "9:00 AM" },
+    { name: "Socrates Agudo Torrado", time: "4:00 PM" },
+  ],
+};
+
+const MyAgenda = () => {
+  const [items, setItems] = useState<{ [key: string]: AgendaItem[] }>({});
+
+  // Función para cargar eventos dinámicamente por día
+  const loadItemsForDay = (day: DateData) => {
+    console.log("Cargando eventos para el día:", day.dateString);
+
+    setItems((prevItems) => ({
+      ...prevItems,
+      [day.dateString]: eventsDatabase[day.dateString] || [], // Cargar eventos si existen, si no, dejar vacío
+    }));
+  };
 
   // Función para mostrar mensaje cuando no hay eventos en un día
   const renderEmptyData = () => {
@@ -38,12 +51,12 @@ const MyCalendar = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Agenda</Text>
-      
+
       <Agenda
         items={items}
-        showOnlySelectedDayItems={true} // Mostrar solo los eventos del día seleccionado
+        showOnlySelectedDayItems={true} // Evita mezclar eventos entre días
         onDayPress={(day: DateData) => {
-          console.log("Día seleccionado:", day.dateString);
+          loadItemsForDay(day); // Cargar eventos solo para el día seleccionado
         }}
         renderItem={(item: AgendaItem) => (
           <View style={styles.item}>
@@ -51,7 +64,7 @@ const MyCalendar = () => {
             <Text>{item.time}</Text>
           </View>
         )}
-        renderEmptyData={renderEmptyData} // Mostrar mensaje cuando no hay eventos
+        renderEmptyData={renderEmptyData} // Muestra mensaje cuando no hay eventos
         theme={{
           agendaDayTextColor: "blue",
           agendaTodayColor: "red",
@@ -100,4 +113,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyCalendar;
+export default MyAgenda;
