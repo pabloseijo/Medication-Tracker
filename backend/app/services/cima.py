@@ -18,13 +18,15 @@ def obtener_medicamento_por_codigo(codigo_nacional):
 
 
 def obtener_medicamento_por_nombre(nombre):
-    """
-    Obtiene el JSON con la información de un medicamento a partir de su nombre.
-    """
-    url = f"https://cima.aemps.es/cima/rest/medicamento?nombre={nombre}"
+    '''
+    Obtiene el JSON con la información del medicamento buscado por nombre (el primero que aparece por nombre).
+    EJEMPLO: "actron"
+    '''
+    url = f"https://cima.aemps.es/cima/rest/medicamentos?nombre={nombre}"
     response = requests.get(url)
     if response.status_code == 200:
-        return response.json()
+        medicamentos = response.json()
+        return medicamentos["resultados"][0]
     else:
         return None
 
