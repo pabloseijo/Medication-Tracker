@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import  start_client, close_client
 from contextlib import asynccontextmanager
 from app.routes.meds import meds_router
+from app.services.typesense import create_meds_collection
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
     print("Iniciando aplicación...")
     # Crear conexión a MongoDB
     await start_client()
+    create_meds_collection()
     print("Conexión a MongoDB establecida.")
 
     yield  # Permite que la aplicación se ejecute
