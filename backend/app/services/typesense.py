@@ -9,6 +9,8 @@ client = typesense.Client({
     "connection_timeout_seconds": 5
 })
 
+
+
 # Crear la colección de medicamentos en Typesense si no existe
 def create_meds_collection():
     collection_name = "medications"
@@ -17,19 +19,27 @@ def create_meds_collection():
     existing_collections = [col["name"] for col in client.collections.retrieve()]
 
     if collection_name in existing_collections:
+        delete_medications_collection()
         print(f"La colección '{collection_name}' ya existe. No se creará nuevamente.")
-    else:
-        schema = {
-            "name": collection_name,
-            "fields": [
-                {"name": "name", "type": "string"},
-            ]
-        }
-        client.collections.create(schema)
-        print(f"Creada la colección '{collection_name}' exitosamente.")
+    
+    schema = {
+        "name": collection_name,
+        "fields": [
+            {"name": "name", "type": "string"},
+        ]
+    }
+    client.collections.create(schema)
+    print(f"Creada la colección '{collection_name}' exitosamente.")
     
     # Insertar medicamentos
     insert_meds()
+
+def delete_medications_collection():
+    try:
+        client.collections["medications"].delete()
+        print("La colección 'medications' ha sido eliminada.")
+    except Exception as e:
+        print(f"Error al eliminar la colección: {e}")
 
 def insert_meds():
     medications = [
@@ -45,6 +55,8 @@ def insert_meds():
         print("Medicamentos insertados correctamente en la colección.")
     except Exception as e:
         print(f"Error al insertar medicamentos: {e}")
+
+
 
 
 # Función para buscar medicamentos con autocompletado
