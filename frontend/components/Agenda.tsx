@@ -118,7 +118,7 @@ export default function MyAgenda() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
         {/* 🔹 Agenda */}
-        <Text className="text-2xl font-extrabold text-center my-4">Agenda</Text>
+        <Text className="text-2xl font-bold text-center my-4">Agenda</Text>
         <Agenda
           showOnlySelectedDayItems={true}
           onDayPress={loadItemsForDay}
