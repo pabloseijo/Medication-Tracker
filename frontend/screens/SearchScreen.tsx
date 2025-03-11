@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
+import BarCodeSearch from "components/BarCodeSearch";
 
 const SearchScreen = () => {
   const [query, setQuery] = useState("");
@@ -17,7 +18,7 @@ const SearchScreen = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/search?q=${text}`);
+      const response = await fetch(`http://localhost:8000/search?q=${text}`); //hacer mockup
       const data = await response.json();
       setSuggestions(data.suggestions);
     } catch (error) {
@@ -35,6 +36,7 @@ const SearchScreen = () => {
 
     try {
       const response = await fetch(`http://localhost:8000/med_name?name=${query}`);
+
       const data = await response.json();
       setMedData(data);
     } catch (error) {
@@ -45,14 +47,19 @@ const SearchScreen = () => {
   };
 
   return (
-    <View className="flex-1 p-5 bg-gray-100">
+    <View className="flex-1 p-5 bg-gray-100 flex-row space-x-3">
       {/* Barra de búsqueda */}
       <SearchBar 
+        className="flex-1"
         query={query} 
         setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
         onSearch={fetchMedData} 
       />
 
+      {/* Código de barras */}
+      <BarCodeSearch 
+        onPress={() => console.log("Escanear código de barras")} />
+      
       {/* Lista de sugerencias */}
       <SuggestionsList 
         suggestions={suggestions} 
