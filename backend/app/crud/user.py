@@ -4,7 +4,9 @@ from app.schemas.user import UserCreate, UserLogin
 from app.utils.security import hash_password, verify_password
 
 
-async def create_user(collection: AsyncIOMotorCollection, user: UserCreate) -> Optional[str]:
+async def create_user(
+    collection: AsyncIOMotorCollection, user: UserCreate
+) -> Optional[str]:
     """Creates an usuario en la base de datos."""
     existing_user = await collection.find_one({"email": user.email})
     if existing_user:
@@ -15,10 +17,12 @@ async def create_user(collection: AsyncIOMotorCollection, user: UserCreate) -> O
 
     result = await collection.insert_one(new_user)
     # Retorna el ID del usuario creado
-    return str(result.inserted_id)  
+    return str(result.inserted_id)
 
 
-async def login(collection: AsyncIOMotorCollection, user: UserLogin) -> Optional[str]:
+async def login_user(
+    collection: AsyncIOMotorCollection, user: UserLogin
+) -> Optional[str]:
     """Comprueba el email y la contraseña introducidos."""
     existing_user = await collection.find_one({"email": user.email})
     if not existing_user:

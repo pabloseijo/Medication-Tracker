@@ -1,8 +1,7 @@
-from typing import Optional
 from pydantic import BaseModel, EmailStr
 
+
 class UserCreate(BaseModel):
-    id: Optional[str]
     name: str
     surname: str
     password: str
@@ -13,8 +12,12 @@ class UserCreate(BaseModel):
     diabetes: bool
     hypertension: bool
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
