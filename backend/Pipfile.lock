@@ -485,6 +485,15 @@
             "markers": "python_version >= '3.9'",
             "version": "==0.46.1"
         },
+        "typesense": {
+            "hashes": [
+                "sha256:24470525b577300bd81fe43029dddd9269b942b20b49236edf049f6ecead7c8e",
+                "sha256:e4330f103a40af98ba2b0ffd817392a84a537e04816221c9a283faadea7718f0"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3'",
+            "version": "==0.21.0"
+        },
         "typing-extensions": {
             "hashes": [
                 "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d",

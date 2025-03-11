@@ -13,6 +13,7 @@ pypdf2 = "*"
 requests = "*"
 pydantic = {extras = ["email"], version = "*"}
 pyjwt = "*"
+typesense = "*"
 
 [dev-packages]
 
