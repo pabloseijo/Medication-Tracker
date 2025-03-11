@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { Text, Card, Button } from "@ui-kitten/components";
 import MedicineCard from "../components/MedicineCard";
+import StatsOverview from "components/StatsOverview";
 
 type MealType = "desayuno" | "comida" | "cena";
 type MedicineList = {
@@ -25,55 +26,61 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* 🔹 Sección: Desayuno */}
-      <Card style={styles.sectionCard}>
-        <Text category="h6">Desayuno</Text>
-        <MedicineCard
-          name="Ibuprofeno"
-          taken={medsTaken.desayuno.ibuprofeno}
-          onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
-        />
-        <MedicineCard
-          name="Omeprazol"
-          taken={medsTaken.desayuno.omeprazol}
-          onPress={() => toggleMedicine("desayuno", "omeprazol")}
-        />
-        <Button appearance="outline" status="info">
-          + Añadir Medicamento
-        </Button>
+    <ScrollView className="flex-1 p-4">
+
+      {/* 🔹 Estadísticas */}
+      <Card className="p-4 mb-4">
+        <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
       </Card>
 
-      {/* Sección: Comida */}
-      <Card style={styles.sectionCard}>
-        <Text category="h6">Comida</Text>
-        <MedicineCard
-          name="Paracetamol"
-          taken={medsTaken.comida.paracetamol}
-          onPress={() => toggleMedicine("comida", "paracetamol")}
-        />
-        <Button appearance="outline" status="info">
-          + Añadir Medicamento
-        </Button>
-      </Card>
+      {/* 🔹 Secciones de Comidas */}
+      <Card className="p-4">
+        
+        {/* 🔹 Sección: Desayuno */}
+        <View className="mb-5">
+          <Text className="text-lg font-semibold mb-2">Desayuno</Text>
+          <MedicineCard
+            name="Ibuprofeno"
+            taken={medsTaken.desayuno.ibuprofeno}
+            onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
+          />
+          <MedicineCard
+            name="Omeprazol"
+            taken={medsTaken.desayuno.omeprazol}
+            onPress={() => toggleMedicine("desayuno", "omeprazol")}
+          />
+          <Button appearance="outline" status="info">
+            + Añadir Medicamento
+          </Button>
+        </View>
 
-      {/* 🔹 Sección: Cena */}
-      <Card style={styles.sectionCard}>
-        <Text category="h6">Cena</Text>
-        <MedicineCard
-          name="Vitamina C"
-          taken={medsTaken.cena.vitaminaC}
-          onPress={() => toggleMedicine("cena", "vitaminaC")}
-        />
-        <Button appearance="outline" status="info">
-          + Añadir Medicamento
-        </Button>
+        {/* 🔹 Sección: Comida */}
+        <View className="mb-5">
+          <Text className="text-lg font-semibold mb-2">Comida</Text>
+          <MedicineCard
+            name="Paracetamol"
+            taken={medsTaken.comida.paracetamol}
+            onPress={() => toggleMedicine("comida", "paracetamol")}
+          />
+          <Button appearance="outline" status="info">
+            + Añadir Medicamento
+          </Button>
+        </View>
+
+        {/* 🔹 Sección: Cena */}
+        <View className="mb-5">
+          <Text className="text-lg font-semibold mb-2">Cena</Text>
+          <MedicineCard
+            name="Vitamina C"
+            taken={medsTaken.cena.vitaminaC}
+            onPress={() => toggleMedicine("cena", "vitaminaC")}
+          />
+          <Button appearance="outline" status="info">
+            + Añadir Medicamento
+          </Button>
+        </View>
+
       </Card>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  sectionCard: { marginBottom: 10, padding: 15 },
-});
