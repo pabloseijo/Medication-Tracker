@@ -3,7 +3,6 @@ import { ApplicationProvider, IconRegistry, Layout, Text } from "@ui-kitten/comp
 import * as eva from "@eva-design/eva";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import HomeScreen from "./screens/HomeScreen";
-import Agenda from "./components/Agenda";
 
 import './global.css'
 
@@ -17,8 +16,7 @@ export default function App() {
       <ApplicationProvider {...eva} theme={eva.light}>
         <SafeAreaView style={{ flex: 1 }}>
           <Layout style={{ flex: 1 }}>
-           {/* <HomeScreen />*/}
-           <Agenda />
+            <HomeScreen />
           </Layout>
         </SafeAreaView>
       </ApplicationProvider>
