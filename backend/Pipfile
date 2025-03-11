@@ -10,6 +10,8 @@ pydantic = "*"
 python-dotenv = "*"
 motor = "*"
 bcrypt = "*"
+pypdf2 = "*"
+requests = "*"
 
 [dev-packages]
 
