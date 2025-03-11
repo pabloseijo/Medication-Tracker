@@ -1,67 +1,127 @@
 import React, { useState } from "react";
-import { View, Text, SafeAreaView } from "react-native";
+import { ScrollView, View, SafeAreaView } from "react-native";
+import { Text, Card, Button } from "@ui-kitten/components";
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from "react-native-calendars";
+import MedicineCard from "../components/MedicineCard";
+import StatsOverview from "components/StatsOverview";
 
 // 🔹 Definimos correctamente el tipo de los eventos
-interface CustomAgendaEntry extends AgendaEntry {
-  meal: "Desayuno" | "Comida" | "Cena";
-}
+
+type MedicineList = {
+  desayuno: { [key: string]: boolean };
+  comida: { [key: string]: boolean };
+  cena: { [key: string]: boolean };
+};
 
 export default function MyAgenda() {
-  const [items, setItems] = useState<AgendaSchedule>({});
+  const [medsTaken, setMedsTaken] = useState<MedicineList>({
+    desayuno: { ibuprofeno: false, omeprazol: false },
+    comida: { paracetamol: false },
+    cena: { vitaminaC: false },
+  });
 
-  // 🔹 Base de datos con eventos
-  const eventsDatabase: { [key: string]: CustomAgendaEntry[] } = {
-    "2025-03-10": [
-      { name: "Tostadas y café", meal: "Desayuno", height: 60, day: "2025-03-10" },
-      { name: "Pasta con ensalada", meal: "Comida", height: 60, day: "2025-03-10" },
-      { name: "Sopa y pan", meal: "Cena", height: 60, day: "2025-03-10" },
-    ],
-    "2025-03-11": [
-      { name: "Huevos revueltos", meal: "Desayuno", height: 60, day: "2025-03-11" },
-      { name: "Pollo asado", meal: "Comida", height: 60, day: "2025-03-11" },
-      { name: "Pizza casera", meal: "Cena", height: 60, day: "2025-03-11" },
-    ],
-  };
-
-  // 🔹 Cargar eventos dinámicamente
+  // 🔹 Cargar eventos dinámicamente cuando se seleccione un día
   const loadItemsForDay = (day: DateData) => {
     console.log("Cargando eventos para el día:", day.dateString);
 
-    const newItems: AgendaSchedule = {};
-    newItems[day.dateString] = eventsDatabase[day.dateString] || [];
-
-    setItems((prevItems) => ({
-      ...prevItems,
-      ...newItems,
-    }));
+    // Actualizar los medicamentos del día seleccionado
+    updateMedsForDay(day.dateString);
   };
 
-  // 🔹 Renderizar cada elemento en la agenda
-  const renderItem = (reservation: CustomAgendaEntry, isFirst: boolean) => (
-    <View className="bg-white p-4 rounded-lg shadow-md my-2 mx-3">
-      <Text className="font-bold text-lg">{reservation.name}</Text>
-      <Text className="text-gray-500 italic">{reservation.meal}</Text>
-    </View>
-  );
+  // Función para actualizar los medicamentos según el día seleccionado
+  const updateMedsForDay = (selectedDay: string) => {
+    if (selectedDay === "2025-03-10") {
+      setMedsTaken({
+        desayuno: { ibuprofeno: false, omeprazol: false },
+        comida: { paracetamol: false },
+        cena: { vitaminaC: false },
+      });
+    } else if (selectedDay === "2025-03-11") {
+      setMedsTaken({
+        desayuno: { ibuprofeno: true, omeprazol: false },
+        comida: { paracetamol: false },
+        cena: { vitaminaC: true },
+      });
+    }
+  };
 
   // 🔹 Mensaje cuando no hay eventos
   const renderEmptyData = () => (
-    <View className="flex-1 justify-center items-center py-4">
-      <Text className="text-gray-500">No hay eventos para este día</Text>
-    </View>
+    <ScrollView className="flex-1">
+    {(
+      <>
+        <Card className="mb-4 p-4">
+          <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
+        </Card>
+
+        {/* 🔹 Sección de Medicamentos */}
+        <Card className="mb-4 p-4">
+          <View className="mb-4">
+            <Text className="text-xl font-semibold mb-2">Desayuno</Text>
+            <MedicineCard
+              name="Ibuprofeno"
+              taken={medsTaken.desayuno.ibuprofeno}
+              onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
+            />
+            <MedicineCard
+              name="Omeprazol"
+              taken={medsTaken.desayuno.omeprazol}
+              onPress={() => toggleMedicine("desayuno", "omeprazol")}
+            />
+            <Button appearance="outline" status="info">
+              + Añadir Medicamento
+            </Button>
+          </View>
+        </Card>
+
+        <Card className="mb-4 p-4">
+          <View className="mb-4">
+            <Text className="text-xl font-semibold mb-2">Comida</Text>
+            <MedicineCard
+              name="Paracetamol"
+              taken={medsTaken.comida.paracetamol}
+              onPress={() => toggleMedicine("comida", "paracetamol")}
+            />
+            <Button appearance="outline" status="info">
+              + Añadir Medicamento
+            </Button>
+          </View>
+        </Card>
+
+        <Card className="mb-4 p-4">
+          <View className="mb-4">
+            <Text className="text-xl font-semibold mb-2">Cena</Text>
+            <MedicineCard
+              name="Vitamina C"
+              taken={medsTaken.cena.vitaminaC}
+              onPress={() => toggleMedicine("cena", "vitaminaC")}
+            />
+            <Button appearance="outline" status="info">
+              + Añadir Medicamento
+            </Button>
+          </View>
+        </Card>
+      </>
+    )}
+  </ScrollView>
   );
 
-  return (
-    <SafeAreaView className="flex-1 bg-white pt-10">
-      <View className="flex-1 mx-4">
-        <Text className="text-2xl font-bold text-center my-4">Agenda</Text>
+  // Función para cambiar el estado de los medicamentos
+  const toggleMedicine = (meal: string, med: string) => {
+    setMedsTaken((prev) => ({
+      ...prev,
+      [meal]: { ...prev[meal], [med]: !prev[meal][med] },
+    }));
+  };
 
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-1 p-4">
+        {/* 🔹 Agenda */}
+        <Text className="text-2xl font-extrabold text-center my-4">Agenda</Text>
         <Agenda
-          items={items}
-          showOnlySelectedDayItems={true} // Solo mostrar eventos del día seleccionado
+          showOnlySelectedDayItems={true}
           onDayPress={loadItemsForDay}
-          renderItem={(reservation, isFirst) => renderItem(reservation as CustomAgendaEntry, isFirst)}
           renderEmptyData={renderEmptyData}
           theme={{
             agendaDayTextColor: "blue",
@@ -69,6 +129,8 @@ export default function MyAgenda() {
             agendaKnobColor: "green",
           }}
         />
+
+        
       </View>
     </SafeAreaView>
   );
