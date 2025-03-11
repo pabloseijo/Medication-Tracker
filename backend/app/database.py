@@ -4,21 +4,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = "medication_tracker"
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("DATABASE_NAME", "medication_tracker")
 
 # Inicialización del cliente y la base de datos
-client: AsyncIOMotorClient
+client = None
 database = None
+
 
 async def start_client():
     """
     Crea y devuelve una conexión a MongoDB.
     """
     global client, database
-    client = AsyncIOMotorClient(MONGO_URI)
-    database = client[DB_NAME]
-    print(f"Conectado a la base de datos: {DB_NAME}")
+    try:
+        client = AsyncIOMotorClient(MONGO_URI)
+        database = client[DB_NAME]
+        print(f"Conectado a la base de datos: {DB_NAME}")
+    except Exception as e:
+        print(f"Error al conectar a MongoDB: {e}")
+        raise
+
 
 async def get_database():
     """
@@ -27,6 +33,7 @@ async def get_database():
     if database is None:
         raise RuntimeError("La base de datos no ha sido inicializada.")
     return database
+
 
 async def close_client():
     """

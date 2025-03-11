@@ -1,14 +1,14 @@
 import requests
-import json
 import PyPDF2
 import os
 
 # Ejemplo: 47178 (Actron Compuesto)
 
+
 def obtener_medicamento_por_codigo(codigo_nacional):
-    '''
+    """
     Obtiene el JSON con la información de un medicamento a partir de su código nacional.
-    '''
+    """
     url = f"https://cima.aemps.es/cima/rest/medicamento?nregistro={codigo_nacional}"
     response = requests.get(url)
     if response.status_code == 200:
@@ -16,76 +16,80 @@ def obtener_medicamento_por_codigo(codigo_nacional):
     else:
         return None
 
+
 def obtener_medicamento_por_nombre(nombre):
-    '''
+    """
     Obtiene el JSON con la información de un medicamento a partir de su nombre.
-    '''
+    """
     url = f"https://cima.aemps.es/cima/rest/medicamento?nombre={nombre}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
     else:
         return None
-    
+
+
 def mostrar_FichaTecnica(codigo_nacional):
-    '''
+    """
     Muestra los primeros 1000 caracteres de la ficha técnica de un medicamento a partir de su código nacional.
-    '''
+    """
     url = f"https://cima.aemps.es/cima/rest/medicamento?nregistro={codigo_nacional}"
     response = requests.get(url)
     if response.status_code == 200:
         medicamento = response.json()
         ficha_tecnica_url = medicamento["docs"][0]["url"]
-           
+
         # Descargar el PDF de la ficha técnica
         pdf_response = requests.get(ficha_tecnica_url)
         pdf_path = f"FT_{codigo_nacional}.pdf"
-        with open(pdf_path, 'wb') as pdf_file:
+        with open(pdf_path, "wb") as pdf_file:
             pdf_file.write(pdf_response.content)
-        
+
         # Leer el contenido del PDF
-        with open(pdf_path, 'rb') as file:
+        with open(pdf_path, "rb") as file:
             reader = PyPDF2.PdfReader(file)
-            texto = ''
+            texto = ""
             for page in reader.pages:
                 texto += page.extract_text()
-            
+
         # Eliminar el archivo PDF descargado
         os.remove(pdf_path)
-            
+
         return texto[:1000]
     else:
         return None
 
+
 def mostrar_Prospecto(codigo_nacional):
-    '''
+    """
     Muestra los primeros 1000 caracteres del prospecto de un medicamento a partir de su código nacional.
-    '''
+    """
     url = f"https://cima.aemps.es/cima/rest/medicamento?nregistro={codigo_nacional}"
     response = requests.get(url)
     if response.status_code == 200:
         medicamento = response.json()
         ficha_tecnica_url = medicamento["docs"][1]["url"]
-           
+
         # Descargar el PDF de la ficha técnica
         pdf_response = requests.get(ficha_tecnica_url)
         pdf_path = f"FT_{codigo_nacional}.pdf"
-        with open(pdf_path, 'wb') as pdf_file:
+        with open(pdf_path, "wb") as pdf_file:
             pdf_file.write(pdf_response.content)
-        
+
         # Leer el contenido del PDF
-        with open(pdf_path, 'rb') as file:
+        with open(pdf_path, "rb") as file:
             reader = PyPDF2.PdfReader(file)
-            texto = ''
+            texto = ""
             for page in reader.pages:
                 texto += page.extract_text()
-            
+
         # Eliminar el archivo PDF descargado
         os.remove(pdf_path)
-            
+
         return texto[:1000]
     else:
         return None
+
 
 def obtener_url_fichatecnica(codigo_nacional):
     """
@@ -101,6 +105,7 @@ def obtener_url_fichatecnica(codigo_nacional):
     else:
         return None
 
+
 def obtener_url_prospecto(codigo_nacional):
     """
     Obtiene la URL del prospecto del medicamento utilizando la API de CIMA.
@@ -115,6 +120,7 @@ def obtener_url_prospecto(codigo_nacional):
     else:
         return None
 
+
 def extraer_apartado_conservacion(prospecto_url):
     """
     Extrae el contenido del apartado "5. Conservación de <medicamento>" del prospecto PDF.
@@ -122,19 +128,19 @@ def extraer_apartado_conservacion(prospecto_url):
     # Descargar el PDF del prospecto
     pdf_response = requests.get(prospecto_url)
     pdf_path = "prospecto_temp.pdf"
-    with open(pdf_path, 'wb') as pdf_file:
+    with open(pdf_path, "wb") as pdf_file:
         pdf_file.write(pdf_response.content)
-    
+
     # Leer el contenido del PDF
-    with open(pdf_path, 'rb') as file:
+    with open(pdf_path, "rb") as file:
         reader = PyPDF2.PdfReader(file)
-        texto = ''
+        texto = ""
         for page in reader.pages:
             texto += page.extract_text()
-        
+
     # Eliminar el archivo PDF descargado
     os.remove(pdf_path)
-    
+
     # Buscar todas las ocurrencias de "5. Conservación"
     ocurrencias = []
     inicio = 0
@@ -143,8 +149,10 @@ def extraer_apartado_conservacion(prospecto_url):
         if inicio == -1:
             break
         ocurrencias.append(inicio)
-        inicio += len("5. Conservación")  # Moverse al siguiente lugar después de la ocurrencia encontrada
-    
+        inicio += len(
+            "5. Conservación"
+        )  # Moverse al siguiente lugar después de la ocurrencia encontrada
+
     if len(ocurrencias) >= 2:
         # Tomamos la segunda ocurrencia de "5. Conservación"
         inicio_apartado = ocurrencias[1]
