@@ -47,7 +47,9 @@ const SearchScreen = () => {
   };
 
   return (
-    <View className="flex-1 p-5 bg-gray-100 flex-row space-x-3">
+    <View className="flex-1 p-5 bg-gray-100 flex-column space-x-3">
+
+    <View className="flex-row items-center space-x-4 mb-4">
       {/* Barra de búsqueda */}
       <SearchBar 
         className="flex-1"
@@ -57,9 +59,9 @@ const SearchScreen = () => {
       />
 
       {/* Código de barras */}
-      <BarCodeSearch 
-        onPress={() => console.log("Escanear código de barras")} />
-      
+      <BarCodeSearch onPress={() => console.log("Escanear código de barras")} />
+    </View>
+
       {/* Lista de sugerencias */}
       <SuggestionsList 
         suggestions={suggestions} 
