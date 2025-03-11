@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Dimensions, SafeAreaView, Platform } from "react-native";
 import { Agenda, DateData } from "react-native-calendars";
+
+const { width, height } = Dimensions.get("window");
 
 // Definir el tipo para los eventos de la agenda
 interface AgendaItem {
@@ -49,29 +51,31 @@ const MyAgenda = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Agenda</Text>
-
-      <Agenda
-        items={items}
-        showOnlySelectedDayItems={true} // Evita mezclar eventos entre días
-        onDayPress={(day: DateData) => {
-          loadItemsForDay(day); // Cargar eventos solo para el día seleccionado
-        }}
-        renderItem={(item: AgendaItem) => (
-          <View style={styles.item}>
-            <Text style={styles.itemTitle}>{item.name}</Text>
-            <Text>{item.time}</Text>
-          </View>
-        )}
-        renderEmptyData={renderEmptyData} // Muestra mensaje cuando no hay eventos
-        theme={{
-          agendaDayTextColor: "blue",
-          agendaTodayColor: "red",
-          agendaKnobColor: "green",
-        }}
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Agenda</Text>
+  
+        <Agenda
+          items={items}
+          showOnlySelectedDayItems={true} // Evita mezclar eventos entre días
+          onDayPress={(day: DateData) => {
+            loadItemsForDay(day); // Cargar eventos solo para el día seleccionado
+          }}
+          renderItem={(item: AgendaItem) => (
+            <View style={styles.item}>
+              <Text style={styles.itemTitle}>{item.name}</Text>
+              <Text>{item.time}</Text>
+            </View>
+          )}
+          renderEmptyData={renderEmptyData} // Muestra mensaje cuando no hay eventos
+          theme={{
+            agendaDayTextColor: "blue",
+            agendaTodayColor: "red",
+            agendaKnobColor: "green",
+          }}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -110,6 +114,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "gray",
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "ios" ? 40 : 0, // Ajusta el espacio para el notch en iPhone
   },
 });
 
