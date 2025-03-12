@@ -106,12 +106,6 @@ export default function MyAgenda() {
   };
   
   
-  
-  
-  
-
-  // 🔹 Mensaje cuando no hay eventos
-  
   // 🔹 Renderizar la vista vacía con medicamentos y swipe
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
@@ -160,7 +154,6 @@ export default function MyAgenda() {
             agendaKnobColor: "green",
           }}
         />
-
 
       </View>
     </SafeAreaView>
