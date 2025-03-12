@@ -42,8 +42,20 @@ type MedicineList = {
   cena: { [key: string]: boolean };
 };
 
+// Cuenta el total de medicamentos en cada comida, independientemente de su estado (true/false).
+function countAllMeds(meds: MedicineList): number {
+  let total = 0;
+  // Recorre desayuno, comida y cena
+  for (const meal of Object.keys(meds)) {
+    // Suma la cantidad de medicamentos en cada comida
+    total += Object.keys(meds[meal]).length;
+  }
+  return total;
+}
+
 
 export default function HomeScreen() {
+
   // Estado para almacenar los tratamientos (resultado del GET)
   const [treatments, setTreatments] = useState<Treatment[]>([]);
 
@@ -60,6 +72,16 @@ export default function HomeScreen() {
     comida: {},
     cena: {},
   });
+
+  // Comunicaciones con Componente Stats
+  const [progress, setProgress] = useState(0.7);
+  const [medsTotal, setMedsTotal] = useState(10);
+  const [topMeds, setTopMeds] = useState([
+    { name: "Paracetamol", taken: 3 },
+    { name: "Ibuprofeno", taken: 2 },
+    { name: "Omeprazol", taken: 1 },
+  ]);
+
 
   const buildMedicineList = (treatments: Treatment[]): MedicineList => {
     const list: MedicineList = { desayuno: {}, comida: {}, cena: {} };
@@ -123,14 +145,14 @@ export default function HomeScreen() {
     }
   };
 
-    // Elimina un medicamento de la lista
-    const removeMedicine = (meal: string, med: string) => {
-      setMedsTaken((prev) => {
-        const newMeds = { ...prev };
-        delete newMeds[meal][med];
-        return newMeds;
-      });
-    };
+  // Elimina un medicamento de la lista
+  const removeMedicine = (meal: string, med: string) => {
+    setMedsTaken((prev) => {
+      const newMeds = { ...prev };
+      delete newMeds[meal][med];
+      return newMeds;
+    });
+  };
 
   // Función para cambiar el estado de los medicamentos
   const toggleMedicine = (meal: string, med: string) => {
@@ -202,7 +224,24 @@ export default function HomeScreen() {
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
       <Card className="mb-4 p-4 shadow-lg rounded-lg">
-        <StatsOverview progress={0.7} medsTaken={0} medsTotal={0} />
+        {/*<StatsOverview
+          progress={progress}
+          medsTaken={countAllMeds(medsTaken)}
+          medsTotal={medsTotal}
+          topMeds={topMeds}
+        />*/}
+
+        <StatsOverview
+          progress={0.5}
+          medsTaken={5}
+          medsTotal={10}
+          topMeds={[
+            { name: "Ibuprofeno", taken: 3 },
+            { name: "Paracetamol", taken: 2 },
+          ]}
+        />
+
+
       </Card>
       {["desayuno", "comida", "cena"].map((meal) => (
         <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
