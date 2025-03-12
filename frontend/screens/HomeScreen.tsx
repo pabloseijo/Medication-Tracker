@@ -36,17 +36,17 @@ interface Treatment {
   duration: number;        // Duración del tratamiento (en días)
 }
 
+type MealType = 'desayuno' | 'comida' | 'cena';
+
 type MedicineList = {
-  desayuno: { [key: string]: boolean };
-  comida: { [key: string]: boolean };
-  cena: { [key: string]: boolean };
+  [key in MealType]: { [key: string]: boolean };
 };
 
 // Cuenta el total de medicamentos en cada comida, independientemente de su estado (true/false).
 function countAllMeds(meds: MedicineList): number {
   let total = 0;
   // Recorre desayuno, comida y cena
-  for (const meal of Object.keys(meds)) {
+  for (const meal of Object.keys(meds) as MealType[]) {
     // Suma la cantidad de medicamentos en cada comida
     total += Object.keys(meds[meal]).length;
   }
@@ -224,13 +224,6 @@ export default function HomeScreen() {
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
       <Card className="mb-4 p-4 shadow-lg rounded-lg">
-        {/*<StatsOverview
-          progress={progress}
-          medsTaken={countAllMeds(medsTaken)}
-          medsTotal={medsTotal}
-          topMeds={topMeds}
-        />*/}
-
         <StatsOverview
           progress={0.5}
           medsTaken={5}
