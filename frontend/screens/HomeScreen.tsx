@@ -1,25 +1,10 @@
 import React, { useState } from "react";
-import {
-  ScrollView,
-  View,
-  SafeAreaView,
-  Animated,
-  Text as RNText,
-} from "react-native";
-import {
-  Text,
-  Card,
-  Button,
-  Modal,
-  Input,
-  Datepicker,
-  Radio,
-  RadioGroup,
-  CheckBox,
-} from "@ui-kitten/components";
+import { ScrollView, View, SafeAreaView, Animated, Text as RNText } from "react-native";
+import { Text, Card, Button } from "@ui-kitten/components";
 import { Agenda, DateData } from "react-native-calendars";
 import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
+import MedicineForm from "../components/MedicineForm"; // ✅ Importamos el nuevo componente
 import { Swipeable } from "react-native-gesture-handler";
 
 // Tipo de la lista de medicamentos
@@ -29,41 +14,23 @@ type MedicineList = {
   cena: { [key: string]: boolean };
 };
 
-export default function MyAgenda() {
-  // Estado de los medicamentos del día
+export default function HomeScreen() {
   const [medsTaken, setMedsTaken] = useState<MedicineList>({
     desayuno: { ibuprofeno: false, omeprazol: false },
     comida: { paracetamol: false },
     cena: { vitaminaC: false },
   });
 
-  // Estados para el modal y formulario
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<string>("");
-  const [medicineType, setMedicineType] = useState<"sporadic" | "treatment">("sporadic");
 
-  // Formulario para Toma Esporádica
-  const [sporadicName, setSporadicName] = useState("");
-  const [sporadicDose, setSporadicDose] = useState("");
-
-  // Formulario para Tratamiento
-  const [treatmentName, setTreatmentName] = useState("");
-  const [treatmentDose, setTreatmentDose] = useState("");
-  const [treatmentStartDate, setTreatmentStartDate] = useState(new Date());
-  const [treatmentDuration, setTreatmentDuration] = useState("");
-  const [treatmentMeals, setTreatmentMeals] = useState({
-    desayuno: false,
-    comida: false,
-    cena: false,
-  });
-
-  // Cargar eventos para un día (ya existente)
+  // 📌 Cargar eventos de un día específico
   const loadItemsForDay = (day: DateData) => {
     console.log("Cargando eventos para el día:", day.dateString);
     updateMedsForDay(day.dateString);
   };
 
-  // Actualización de medicamentos según el día seleccionado
+  // 📌 Actualiza la lista de medicamentos según el día
   const updateMedsForDay = (selectedDay: string) => {
     if (selectedDay === "2025-03-10") {
       setMedsTaken({
@@ -80,7 +47,7 @@ export default function MyAgenda() {
     }
   };
 
-  // Función para eliminar un medicamento mediante swipe
+  // 📌 Elimina un medicamento de la lista
   const removeMedicine = (meal: string, med: string) => {
     setMedsTaken((prev) => {
       const newMeds = { ...prev };
@@ -89,7 +56,7 @@ export default function MyAgenda() {
     });
   };
 
-  // Función para alternar el estado de un medicamento
+  // 📌 Alterna el estado de un medicamento (tomado/no tomado)
   const toggleMedicine = (meal: string, med: string) => {
     setMedsTaken((prev) => ({
       ...prev,
@@ -97,11 +64,10 @@ export default function MyAgenda() {
     }));
   };
 
-  // Render de la lista de medicamentos con swipe
+  // 📌 Renderiza la lista de medicamentos con swipe
   const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
     return Object.keys(meds).map((med) => (
       <View key={med} className="relative mb-2">
-        {/* Botón de eliminar detrás de la tarjeta */}
         <View className="absolute inset-0 h-full bg-red-500 flex justify-center items-end pr-5 rounded-lg">
           <RNText className="text-white font-bold text-lg">Borrar</RNText>
         </View>
@@ -117,115 +83,47 @@ export default function MyAgenda() {
               extrapolate: "clamp",
             });
 
-            return (
-              <Animated.View
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  transform: [{ translateX }],
-                }}
-              />
-            );
+            return <Animated.View style={{ width: "100%", height: "100%", transform: [{ translateX }] }} />;
           }}
         >
-          <MedicineCard
-            name={med}
-            taken={meds[med]}
-            onPress={() => toggleMedicine(meal, med)}
-          />
+          <MedicineCard name={med} taken={meds[med]} onPress={() => toggleMedicine(meal, med)} />
         </Swipeable>
       </View>
     ));
   };
 
-  // Abre el modal de agregar medicamento, seteando el momento (meal) actual
+  // 📌 Abre el modal y define la comida seleccionada
   const openAddMedicineModal = (meal: string) => {
     setSelectedMeal(meal);
-    // Para tratamientos se preselecciona el momento según el botón pulsado
-    setTreatmentMeals({
-      desayuno: meal === "desayuno",
-      comida: meal === "comida",
-      cena: meal === "cena",
-    });
-    // Reseteamos campos del formulario
-    setSporadicName("");
-    setSporadicDose("");
-    setTreatmentName("");
-    setTreatmentDose("");
-    setTreatmentStartDate(new Date());
-    setTreatmentDuration("");
-    setMedicineType("sporadic");
     setModalVisible(true);
   };
 
-  // Función para guardar el medicamento y llamar a la API correspondiente
-  const saveMedicine = async () => {
-    if (medicineType === "sporadic") {
-      // Se crea el array moments según el momento seleccionado:
-      // Orden: [desayuno, comida, cena]
-      const momentsMapping: { [key: string]: boolean[] } = {
-        desayuno: [true, false, false],
-        comida: [false, true, false],
-        cena: [false, false, true],
-      };
-
-      const data = {
-        name: sporadicName,
-        cantidad: parseInt(sporadicDose),
-        moments: momentsMapping[selectedMeal] || [false, false, false],
-        // En la toma esporádica, se envía la fecha por defecto (según el modelo, datetime=1)
-        inicio: new Date("0001-01-01T00:00:00Z").toISOString(),
-        duration_days: 1,
-      };
-
-      try {
-        const response = await fetch("http://localhost:8000/sporadic", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        if (response.ok) {
-          console.log("Medicamento esporádico guardado");
-          // Aquí podrías actualizar el calendario si fuera necesario
-        } else {
-          console.error("Error al guardar medicamento esporádico");
-        }
-      } catch (error) {
-        console.error("Error:", error);
+  // 📌 Guarda un medicamento en el backend
+  const saveMedicine = async (data: any) => {
+    try {
+      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(data, null, 2));
+  
+      const response = await fetch("http://localhost:8000/sporadic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error en la API: ${response.status} - ${errorText}`);
       }
-    } else if (medicineType === "treatment") {
-      const data = {
-        name: treatmentName,
-        cantidad: parseInt(treatmentDose),
-        moments: [
-          treatmentMeals.desayuno,
-          treatmentMeals.comida,
-          treatmentMeals.cena,
-        ],
-        inicio: treatmentStartDate.toISOString(),
-        duration_days: parseInt(treatmentDuration),
-      };
-
-      try {
-        const response = await fetch("http://localhost:8000/treatments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        if (response.ok) {
-          console.log("Tratamiento guardado");
-          // Aquí podrías actualizar el calendario para los días del tratamiento
-        } else {
-          console.error("Error al guardar tratamiento");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
+  
+      console.log("✅ Medicamento guardado correctamente.");
+    } catch (error) {
+      console.error("❌ Error al guardar el medicamento:", error);
     }
-    setModalVisible(false);
   };
+  
 
-  // Render de la vista vacía con medicamentos y botones para agregar
+  // 📌 Renderiza la vista vacía con medicamentos y botones para agregar
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
       <Card className="mb-4 p-4 shadow-lg rounded-lg">
@@ -236,11 +134,7 @@ export default function MyAgenda() {
           <View className="mb-4">
             <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
             {renderMedicineList(meal, medsTaken[meal])}
-            <Button
-              appearance="outline"
-              status="info"
-              onPress={() => openAddMedicineModal(meal)}
-            >
+            <Button appearance="outline" status="info" onPress={() => openAddMedicineModal(meal)}>
               + Añadir Medicamento
             </Button>
           </View>
@@ -252,139 +146,12 @@ export default function MyAgenda() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
-        <Text className="text-center my-4" style={{ fontSize: 20, fontWeight: "bold" }}>
-          Agenda
-        </Text>
-        <Agenda
-          showOnlySelectedDayItems={true}
-          onDayPress={loadItemsForDay}
-          renderEmptyData={renderEmptyData}
-          theme={{
-            agendaDayTextColor: "blue",
-            agendaTodayColor: "red",
-            agendaKnobColor: "green",
-          }}
-        />
+        <Text className="text-center my-4 text-2xl font-bold">Agenda</Text>
+        <Agenda showOnlySelectedDayItems={true} onDayPress={loadItemsForDay} renderEmptyData={renderEmptyData} />
       </View>
-      {/* Modal para agregar medicamento */}
-      <Modal
-        visible={isModalVisible}
-        backdropStyle={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-        onBackdropPress={() => setModalVisible(false)}
-      >
-        <Card disabled={true} style={{ padding: 20 }}>
-          <Text category="h5" style={{ marginBottom: 10 }}>
-            Añadir Medicamento
-          </Text>
-          <RadioGroup
-            selectedIndex={medicineType === "sporadic" ? 0 : 1}
-            onChange={(index) =>
-              setMedicineType(index === 0 ? "sporadic" : "treatment")
-            }
-            style={{ marginBottom: 20 }}
-          >
-            <Radio>Toma Esporádica</Radio>
-            <Radio>Tratamiento</Radio>
-          </RadioGroup>
-          {medicineType === "sporadic" ? (
-            <>
-              <Input
-                label="Nombre"
-                placeholder="Nombre del medicamento"
-                value={sporadicName}
-                onChangeText={setSporadicName}
-                style={{ marginBottom: 10 }}
-              />
-              <Input
-                label="Cantidad"
-                placeholder="Dosis (ej: 1)"
-                value={sporadicDose}
-                onChangeText={setSporadicDose}
-                keyboardType="numeric"
-                style={{ marginBottom: 10 }}
-              />
-              <Text style={{ marginBottom: 10 }}>Momento: {selectedMeal}</Text>
-            </>
-          ) : (
-            <>
-              <Input
-                label="Nombre"
-                placeholder="Nombre del medicamento"
-                value={treatmentName}
-                onChangeText={setTreatmentName}
-                style={{ marginBottom: 10 }}
-              />
-              <Input
-                label="Cantidad"
-                placeholder="Dosis (ej: 1)"
-                value={treatmentDose}
-                onChangeText={setTreatmentDose}
-                keyboardType="numeric"
-                style={{ marginBottom: 10 }}
-              />
-              <Datepicker
-                label="Fecha de inicio"
-                date={treatmentStartDate}
-                onSelect={(nextDate) => setTreatmentStartDate(nextDate)}
-                style={{ marginBottom: 10 }}
-              />
-              <Text category="s1" style={{ marginBottom: 10 }}>
-                Momentos del día:
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 10,
-                }}
-              >
-                <CheckBox
-                  checked={treatmentMeals.desayuno}
-                  onChange={(nextChecked) =>
-                    setTreatmentMeals({
-                      ...treatmentMeals,
-                      desayuno: nextChecked,
-                    })
-                  }
-                >
-                  Desayuno
-                </CheckBox>
-                <CheckBox
-                  checked={treatmentMeals.comida}
-                  onChange={(nextChecked) =>
-                    setTreatmentMeals({
-                      ...treatmentMeals,
-                      comida: nextChecked,
-                    })
-                  }
-                >
-                  Comida
-                </CheckBox>
-                <CheckBox
-                  checked={treatmentMeals.cena}
-                  onChange={(nextChecked) =>
-                    setTreatmentMeals({
-                      ...treatmentMeals,
-                      cena: nextChecked,
-                    })
-                  }
-                >
-                  Cena
-                </CheckBox>
-              </View>
-              <Input
-                label="Duración (días)"
-                placeholder="Número de días"
-                value={treatmentDuration}
-                onChangeText={setTreatmentDuration}
-                keyboardType="numeric"
-                style={{ marginBottom: 10 }}
-              />
-            </>
-          )}
-          <Button onPress={saveMedicine}>Guardar</Button>
-        </Card>
-      </Modal>
+
+      {/* ✅ Integración del formulario de medicamentos */}
+      <MedicineForm isVisible={isModalVisible} onClose={() => setModalVisible(false)} onSave={saveMedicine} selectedMeal={selectedMeal} />
     </SafeAreaView>
   );
 }
