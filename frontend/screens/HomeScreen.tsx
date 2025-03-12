@@ -42,20 +42,41 @@ type MedicineList = {
   [key in MealType]: { [key: string]: boolean };
 };
 
-// Cuenta el total de medicamentos en cada comida, independientemente de su estado (true/false).
+// Cuenta el total de medicamentos en la estructura MedicineList
 function countAllMeds(meds: MedicineList): number {
   let total = 0;
-  // Recorre desayuno, comida y cena
   for (const meal of Object.keys(meds) as MealType[]) {
-    // Suma la cantidad de medicamentos en cada comida
     total += Object.keys(meds[meal]).length;
   }
   return total;
 }
 
+// Cuenta cuántos medicamentos se han tomado (valor === true)
+function countTakenMeds(meds: MedicineList): number {
+  let total = 0;
+  for (const meal of Object.keys(meds) as MealType[]) {
+    total += Object.values(meds[meal]).filter(val => val === true).length;
+  }
+  return total;
+}
+
+function computeTopMeds(meds: MedicineList): { name: string; taken: number }[] {
+  const counts: { [name: string]: number } = {};
+  for (const meal of Object.keys(meds) as MealType[]) {
+    for (const med in meds[meal]) {
+      if (meds[meal][med] === true) {
+        counts[med] = (counts[med] || 0) + 1;
+      }
+    }
+  }
+  // Convierte el objeto a array y ordena de mayor a menor
+  return Object.entries(counts)
+    .map(([name, taken]) => ({ name, taken }))
+    .sort((a, b) => b.taken - a.taken);
+}
+
 
 export default function HomeScreen() {
-
   // Estado para almacenar los tratamientos (resultado del GET)
   const [treatments, setTreatments] = useState<Treatment[]>([]);
 
@@ -67,21 +88,16 @@ export default function HomeScreen() {
   const [selectedMeal, setSelectedMeal] = useState<string>("");
 
   // (Opcional) Si sigues usando tomas esporádicas en otra estructura, lo puedes eliminar
-  const [medsTaken, setMedsTaken] = useState<{ [key: string]: any }>({
+  const [medsTaken, setMedsTaken] = useState<MedicineList>({
     desayuno: {},
     comida: {},
     cena: {},
   });
 
-  // Comunicaciones con Componente Stats
-  const [progress, setProgress] = useState(0.7);
-  const [medsTotal, setMedsTotal] = useState(10);
-  const [topMeds, setTopMeds] = useState([
-    { name: "Paracetamol", taken: 3 },
-    { name: "Ibuprofeno", taken: 2 },
-    { name: "Omeprazol", taken: 1 },
-  ]);
-
+  const totalMeds = countAllMeds(medsTaken);
+  const takenMeds = countTakenMeds(medsTaken);
+  const progressValue = totalMeds > 0 ? takenMeds / totalMeds : 0;
+  const topMedsComputed = computeTopMeds(medsTaken);
 
   const buildMedicineList = (treatments: Treatment[]): MedicineList => {
     const list: MedicineList = { desayuno: {}, comida: {}, cena: {} };
@@ -146,7 +162,7 @@ export default function HomeScreen() {
   };
 
   // Elimina un medicamento de la lista
-  const removeMedicine = (meal: string, med: string) => {
+  const removeMedicine = (meal: MealType, med: string) => {
     setMedsTaken((prev) => {
       const newMeds = { ...prev };
       delete newMeds[meal][med];
@@ -155,7 +171,7 @@ export default function HomeScreen() {
   };
 
   // Función para cambiar el estado de los medicamentos
-  const toggleMedicine = (meal: string, med: string) => {
+  const toggleMedicine = (meal: MealType, med: string) => {
     setMedsTaken((prev) => ({
       ...prev,
       [meal]: { ...prev[meal], [med]: !prev[meal][med] },
@@ -173,7 +189,7 @@ export default function HomeScreen() {
         <Swipeable
           friction={2}
           rightThreshold={60}
-          onSwipeableOpen={() => removeMedicine(meal, med)}
+          onSwipeableOpen={() => removeMedicine(meal as MealType, med)}
           renderRightActions={(progress, dragX) => {
             const translateX = dragX.interpolate({
               inputRange: [-100, 0],
@@ -184,7 +200,7 @@ export default function HomeScreen() {
             return <Animated.View style={{ width: "100%", height: "100%", transform: [{ translateX }] }} />;
           }}
         >
-          <MedicineCard name={med} taken={meds[med]} onPress={() => toggleMedicine(meal, med)} />
+          <MedicineCard name={med} taken={meds[med]} onPress={() => toggleMedicine(meal as MealType, med)} />
         </Swipeable>
       </View>
     ));
@@ -224,14 +240,13 @@ export default function HomeScreen() {
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
       <Card className="mb-4 p-4 shadow-lg rounded-lg">
+
+        {/* Componente StatsOverview: Estadísticas de los medicamentos */}
         <StatsOverview
-          progress={0.5}
-          medsTaken={5}
-          medsTotal={10}
-          topMeds={[
-            { name: "Ibuprofeno", taken: 3 },
-            { name: "Paracetamol", taken: 2 },
-          ]}
+          progress={progressValue}
+          medsTaken={takenMeds}
+          medsTotal={totalMeds}
+          topMeds={topMedsComputed}
         />
 
 
