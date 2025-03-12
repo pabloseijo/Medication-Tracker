@@ -32,7 +32,6 @@ def autocomplete_meds(name: str):
     med = obtener_medicamento_por_nombre(name)
     return med
 
-
 @meds_router.post("/sporadic", status_code=status.HTTP_201_CREATED)
 async def create_sporadic_medication(
     medication: SporadicMedicationCreate,
