@@ -80,14 +80,6 @@ export default function HomeScreen() {
   };
   
 
-  // Función para obtener todos los tratamientos activos en un día dado
-  const getTreatmentsForDay = (date: Date): Treatment[] => {
-    return treatments.filter((treatment) => {
-      const treatmentEnd = new Date(treatment.startDate);
-      treatmentEnd.setDate(treatmentEnd.getDate() + treatment.duration);
-      return date >= treatment.startDate && date <= treatmentEnd;
-    });
-  };
 
 
   const loadItemsForDay = async (day: DateData) => {
@@ -146,19 +138,23 @@ export default function HomeScreen() {
     });
   };
 
-  const renderTreatmentList = (meal: string, date: Date) => {
-    const treatmentsForMeal = getTreatmentsForMeal(meal, date);
-    return treatmentsForMeal.map((treatment, index) => (
-      <View key={index} className="mb-2">
-        <Text>
-          {treatment.name} - {treatment.dose} mg
-        </Text>
-        <Text>
-          Inicio: {treatment.startDate.toDateString()} - Duración: {treatment.duration} día(s)
-        </Text>
-      </View>
-    ));
-  };
+
+    // Renderiza las MedicineCard usando la estructura obtenida (MedicineList)
+    const renderTreatmentList = (meal: string, date: Date) => {
+      // Alternativamente, podrías usar getTreatmentsForMeal para mostrar más detalles
+      // Aquí usamos la estructura medsTaken, que tiene el formato deseado
+      return Object.keys(medsTaken[meal]).map((med, index) => (
+        <MedicineCard
+          key={index}
+          name={med}
+          taken={medsTaken[meal][med]}
+          onPress={() => {
+            // Por ejemplo, aquí puedes alternar el estado o realizar otra acción
+            console.log(`Toggle ${med} en ${meal}`);
+          }}
+        />
+      ));
+    };
 
   // Abre el modal para agregar medicamento y define la comida seleccionada
   const openAddMedicineModal = (meal: string) => {
