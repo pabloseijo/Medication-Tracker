@@ -48,62 +48,62 @@ export default function MyAgenda() {
   // 🔹 Mensaje cuando no hay eventos
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
-    {(
-      <>
-        <Card className="mb-4 p-4">
-          <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
-        </Card>
+      {(
+        <>
+          <Card className="mb-4 p-4">
+            <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
+          </Card>
 
-        {/* 🔹 Sección de Medicamentos */}
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Desayuno</Text>
-            <MedicineCard
-              name="Ibuprofeno"
-              taken={medsTaken.desayuno.ibuprofeno}
-              onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
-            />
-            <MedicineCard
-              name="Omeprazol"
-              taken={medsTaken.desayuno.omeprazol}
-              onPress={() => toggleMedicine("desayuno", "omeprazol")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
+          {/* 🔹 Sección de Medicamentos */}
+          <Card className="mb-4 p-4">
+            <View className="mb-4">
+              <Text className="text-xl font-semibold mb-2">Desayuno</Text>
+              <MedicineCard
+                name="Ibuprofeno"
+                taken={medsTaken.desayuno.ibuprofeno}
+                onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
+              />
+              <MedicineCard
+                name="Omeprazol"
+                taken={medsTaken.desayuno.omeprazol}
+                onPress={() => toggleMedicine("desayuno", "omeprazol")}
+              />
+              <Button appearance="outline" status="info">
+                + Añadir Medicamento
+              </Button>
+            </View>
+          </Card>
 
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Comida</Text>
-            <MedicineCard
-              name="Paracetamol"
-              taken={medsTaken.comida.paracetamol}
-              onPress={() => toggleMedicine("comida", "paracetamol")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
+          <Card className="mb-4 p-4">
+            <View className="mb-4">
+              <Text className="text-xl font-semibold mb-2">Comida</Text>
+              <MedicineCard
+                name="Paracetamol"
+                taken={medsTaken.comida.paracetamol}
+                onPress={() => toggleMedicine("comida", "paracetamol")}
+              />
+              <Button appearance="outline" status="info">
+                + Añadir Medicamento
+              </Button>
+            </View>
+          </Card>
 
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Cena</Text>
-            <MedicineCard
-              name="Vitamina C"
-              taken={medsTaken.cena.vitaminaC}
-              onPress={() => toggleMedicine("cena", "vitaminaC")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
-      </>
-    )}
-  </ScrollView>
+          <Card className="mb-4 p-4">
+            <View className="mb-4">
+              <Text className="text-xl font-semibold mb-2">Cena</Text>
+              <MedicineCard
+                name="Vitamina C"
+                taken={medsTaken.cena.vitaminaC}
+                onPress={() => toggleMedicine("cena", "vitaminaC")}
+              />
+              <Button appearance="outline" status="info">
+                + Añadir Medicamento
+              </Button>
+            </View>
+          </Card>
+        </>
+      )}
+    </ScrollView>
   );
 
   // Función para cambiar el estado de los medicamentos
@@ -118,7 +118,8 @@ export default function MyAgenda() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
         {/* 🔹 Agenda */}
-        <Text className="text-8xl font-bold text-center my-4">Agenda</Text>
+        {/* <Text className="text-center my-4" style={{ fontSize: 20, fontWeight: "bold" }}>Agenda</Text> */}
+        <Text className="text-center my-4" style={{ fontSize: 20, fontWeight: "bold" }}>Agenda</Text>
         <Agenda
           showOnlySelectedDayItems={true}
           onDayPress={loadItemsForDay}
@@ -130,7 +131,7 @@ export default function MyAgenda() {
           }}
         />
 
-        
+
       </View>
     </SafeAreaView>
   );
