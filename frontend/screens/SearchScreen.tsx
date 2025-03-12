@@ -18,7 +18,7 @@ const SearchScreen = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/search?q=${text}`); //hacer mockup
+      const response = await fetch(`http://localhost:8000/search?q=${text}`);
       const data = await response.json();
       setSuggestions(data.suggestions);
     } catch (error) {
@@ -36,7 +36,6 @@ const SearchScreen = () => {
 
     try {
       const response = await fetch(`http://localhost:8000/med_name?name=${query}`);
-
       const data = await response.json();
       setMedData(data);
     } catch (error) {
@@ -47,23 +46,23 @@ const SearchScreen = () => {
   };
 
   return (
-    <View className="flex-1 p-5 bg-gray-100 flex-column space-x-3">
+    <View className="flex-1 p-6 bg-gray-50 space-y-6">
+      <View className="flex-row items-center space-x-4">
+        {/* Barra de búsqueda */}
+        <SearchBar 
+          className="flex-1 bg-white p-3 rounded-lg shadow-md border border-gray-300"
+          query={query} 
+          setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
+          onSearch={fetchMedData} 
+        />
 
-    <View className="flex-row items-center space-x-4 mb-4">
-      {/* Barra de búsqueda */}
-      <SearchBar 
-        className="flex-1"
-        query={query} 
-        setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
-        onSearch={fetchMedData} 
-      />
-
-      {/* Código de barras */}
-      <BarCodeSearch onPress={() => console.log("Escanear código de barras")} />
-    </View>
+        {/* Código de barras */}
+        <BarCodeSearch className="p-3 bg-blue-600 rounded-lg shadow-md" onPress={() => console.log("Escanear código de barras")} />
+      </View>
 
       {/* Lista de sugerencias */}
       <SuggestionsList 
+        className="bg-white p-3 rounded-lg shadow-md border border-gray-200"
         suggestions={suggestions} 
         onSelect={(name) => setQuery(name)} 
       />
@@ -72,21 +71,20 @@ const SearchScreen = () => {
       {loading && <ActivityIndicator size="large" color="#007AFF" className="mt-4" />}
 
       {/* Información del medicamento */}
-
-    {medData && (
-      <View className="mt-5 p-4 bg-white rounded-lg shadow-md">
-        <Text className="text-lg font-bold"> Nombre: {medData.nombre}</Text>
-        <Text className="text-gray-600"> Laboratorio: {medData.labtitular}</Text>
-        <Text className="text-gray-600"> Vía de administración: {medData.viasAdministracion[0]?.nombre}</Text>
-        <Text className="text-gray-600"> Forma farmacéutica: {medData.formaFarmaceutica?.nombre}</Text>
-        <Text className="text-gray-600"> Dosis: {medData.dosis}</Text>
-        <Text className="text-gray-600"> Prescripción: {medData.cpresc}</Text>
+      {medData && (
+        <View className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300">
+          <Text className="text-xl font-bold text-blue-900">💊 {medData.nombre}</Text>
+          <Text className="text-gray-600 mt-2">🏭 <Text className="font-semibold">Laboratorio:</Text> {medData.labtitular}</Text>
+          <Text className="text-gray-600 mt-1">📝 <Text className="font-semibold">Vía de administración:</Text> {medData.viasAdministracion[0]?.nombre}</Text>
+          <Text className="text-gray-600 mt-1">🏷️ <Text className="font-semibold">Forma farmacéutica:</Text> {medData.formaFarmaceutica?.nombre}</Text>
+          <Text className="text-gray-600 mt-1">🔹 <Text className="font-semibold">Dosis:</Text> {medData.dosis}</Text>
+          <Text className="text-gray-600 mt-1">📜 <Text className="font-semibold">Prescripción:</Text> {medData.cpresc}</Text>
         </View>
-    )}
+      )}
 
       {/* Mensaje de error si no se encuentra el medicamento */}
       {!loading && medData === null && query !== "" && (
-        <Text className="mt-5 text-lg text-red-500 text-center">
+        <Text className="mt-5 text-lg text-red-600 text-center font-semibold">
           ⚠️ Medicamento no encontrado
         </Text>
       )}
