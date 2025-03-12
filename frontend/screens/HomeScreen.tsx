@@ -126,6 +126,15 @@ export default function HomeScreen() {
     }
   };
 
+    // Elimina un medicamento de la lista
+    const removeMedicine = (meal: string, med: string) => {
+      setMedsTaken((prev) => {
+        const newMeds = { ...prev };
+        delete newMeds[meal][med];
+        return newMeds;
+      });
+    };
+
   // Función para cambiar el estado de los medicamentos
   const toggleMedicine = (meal: string, med: string) => {
     setMedsTaken((prev) => ({
@@ -147,19 +156,31 @@ export default function HomeScreen() {
   };
 
 
-  // Renderiza las MedicineCard usando la estructura obtenida (MedicineList)
-  const renderTreatmentList = (meal: string, date: Date) => {
-    // Alternativamente, podrías usar getTreatmentsForMeal para mostrar más detalles
-    // Aquí usamos la estructura medsTaken, que tiene el formato deseado
-    return Object.keys(medsTaken[meal]).map((med, index) => (
-      <MedicineCard
-        key={index}
-        name={med}
-        taken={medsTaken[meal][med]}
-        onPress={() => {
-          toggleMedicine(meal, med);
-        }}
-      />
+  // 📌 Renderiza la lista de medicamentos con swipe
+  const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
+    return Object.keys(meds).map((med) => (
+      <View key={med} className="relative mb-2">
+        <View className="absolute inset-0 h-full bg-red-500 flex justify-center items-end pr-5 rounded-lg">
+          <RNText className="text-white font-bold text-lg">Borrar</RNText>
+        </View>
+
+        <Swipeable
+          friction={2}
+          rightThreshold={60}
+          onSwipeableOpen={() => removeMedicine(meal, med)}
+          renderRightActions={(progress, dragX) => {
+            const translateX = dragX.interpolate({
+              inputRange: [-100, 0],
+              outputRange: [-100, 0],
+              extrapolate: "clamp",
+            });
+
+            return <Animated.View style={{ width: "100%", height: "100%", transform: [{ translateX }] }} />;
+          }}
+        >
+          <MedicineCard name={med} taken={meds[med]} onPress={() => toggleMedicine(meal, med)} />
+        </Swipeable>
+      </View>
     ));
   };
 
@@ -203,7 +224,7 @@ export default function HomeScreen() {
         <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
           <View className="mb-4">
             <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
-            {renderTreatmentList(meal, selectedDate)}
+            {renderMedicineList(meal, medsTaken[meal])}
             <Button appearance="outline" status="info" onPress={() => openAddMedicineModal(meal)}>
               + Añadir Medicamento
             </Button>
