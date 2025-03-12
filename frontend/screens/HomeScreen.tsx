@@ -78,7 +78,7 @@ export default function HomeScreen() {
     });
     return list;
   };
-  
+
 
 
 
@@ -87,7 +87,7 @@ export default function HomeScreen() {
     const [year, month, dayNum] = day.dateString.split("-").map(Number);
     const localDate = new Date(year, month - 1, dayNum);
     setSelectedDate(localDate);
-  
+
     try {
       const response = await fetch("http://localhost:8000/sporadic");
       if (response.ok) {
@@ -104,7 +104,7 @@ export default function HomeScreen() {
           duration: item.duration_days,
         }));
         setTreatments(mappedTreatments);
-        
+
         // Filtramos los tratamientos activos para la fecha seleccionada
         const activeTreatments: Treatment[] = mappedTreatments.filter((treatment) => {
           const treatmentEnd = new Date(treatment.startDate);
@@ -115,7 +115,7 @@ export default function HomeScreen() {
         const medicineList: MedicineList = buildMedicineList(activeTreatments);
         // Actualizamos el estado para la visualización
         setMedsTaken(medicineList);
-        
+
         // Imprime en consola para ver el resultado
         console.log("Formato final:", medicineList);
       } else {
@@ -124,6 +124,14 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("Error al obtener sporadic: ", error);
     }
+  };
+
+  // Función para cambiar el estado de los medicamentos
+  const toggleMedicine = (meal: string, med: string) => {
+    setMedsTaken((prev) => ({
+      ...prev,
+      [meal]: { ...prev[meal], [med]: !prev[meal][med] },
+    }));
   };
 
   // Función para renderizar la lista de tratamientos filtrados por comida y día
@@ -139,22 +147,21 @@ export default function HomeScreen() {
   };
 
 
-    // Renderiza las MedicineCard usando la estructura obtenida (MedicineList)
-    const renderTreatmentList = (meal: string, date: Date) => {
-      // Alternativamente, podrías usar getTreatmentsForMeal para mostrar más detalles
-      // Aquí usamos la estructura medsTaken, que tiene el formato deseado
-      return Object.keys(medsTaken[meal]).map((med, index) => (
-        <MedicineCard
-          key={index}
-          name={med}
-          taken={medsTaken[meal][med]}
-          onPress={() => {
-            // Por ejemplo, aquí puedes alternar el estado o realizar otra acción
-            console.log(`Toggle ${med} en ${meal}`);
-          }}
-        />
-      ));
-    };
+  // Renderiza las MedicineCard usando la estructura obtenida (MedicineList)
+  const renderTreatmentList = (meal: string, date: Date) => {
+    // Alternativamente, podrías usar getTreatmentsForMeal para mostrar más detalles
+    // Aquí usamos la estructura medsTaken, que tiene el formato deseado
+    return Object.keys(medsTaken[meal]).map((med, index) => (
+      <MedicineCard
+        key={index}
+        name={med}
+        taken={medsTaken[meal][med]}
+        onPress={() => {
+          toggleMedicine(meal, med);
+        }}
+      />
+    ));
+  };
 
   // Abre el modal para agregar medicamento y define la comida seleccionada
   const openAddMedicineModal = (meal: string) => {
