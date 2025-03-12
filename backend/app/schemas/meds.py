@@ -1,13 +1,12 @@
 from typing import Optional
 from pydantic import BaseModel
-from datetime import date, time
+from datetime import date, datetime
 
 
 class SporadicMedicationCreate(BaseModel):
     user_id: Optional[str]
     name: str
-    date: date
-    time: time
+    datetime: datetime
     dosage_amount: float
     dosage_unit: str
 
