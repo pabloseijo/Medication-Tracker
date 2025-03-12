@@ -40,9 +40,7 @@ export default function MyAgenda() {
   // Estados para el modal y formulario
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<string>("");
-  const [medicineType, setMedicineType] = useState<"sporadic" | "treatment">(
-    "sporadic"
-  );
+  const [medicineType, setMedicineType] = useState<"sporadic" | "treatment">("sporadic");
 
   // Formulario para Toma Esporádica
   const [sporadicName, setSporadicName] = useState("");
@@ -50,6 +48,7 @@ export default function MyAgenda() {
 
   // Formulario para Tratamiento
   const [treatmentName, setTreatmentName] = useState("");
+  const [treatmentDose, setTreatmentDose] = useState("");
   const [treatmentStartDate, setTreatmentStartDate] = useState(new Date());
   const [treatmentDuration, setTreatmentDuration] = useState("");
   const [treatmentMeals, setTreatmentMeals] = useState({
@@ -99,10 +98,7 @@ export default function MyAgenda() {
   };
 
   // Render de la lista de medicamentos con swipe
-  const renderMedicineList = (
-    meal: string,
-    meds: { [key: string]: boolean }
-  ) => {
+  const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
     return Object.keys(meds).map((med) => (
       <View key={med} className="relative mb-2">
         {/* Botón de eliminar detrás de la tarjeta */}
@@ -155,6 +151,7 @@ export default function MyAgenda() {
     setSporadicName("");
     setSporadicDose("");
     setTreatmentName("");
+    setTreatmentDose("");
     setTreatmentStartDate(new Date());
     setTreatmentDuration("");
     setMedicineType("sporadic");
@@ -164,7 +161,23 @@ export default function MyAgenda() {
   // Función para guardar el medicamento y llamar a la API correspondiente
   const saveMedicine = async () => {
     if (medicineType === "sporadic") {
-      const data = { name: sporadicName, dose: sporadicDose, meal: selectedMeal };
+      // Se crea el array moments según el momento seleccionado:
+      // Orden: [desayuno, comida, cena]
+      const momentsMapping: { [key: string]: boolean[] } = {
+        desayuno: [true, false, false],
+        comida: [false, true, false],
+        cena: [false, false, true],
+      };
+
+      const data = {
+        name: sporadicName,
+        cantidad: parseInt(sporadicDose),
+        moments: momentsMapping[selectedMeal] || [false, false, false],
+        // En la toma esporádica, se envía la fecha por defecto (según el modelo, datetime=1)
+        inicio: new Date("0001-01-01T00:00:00Z").toISOString(),
+        duration_days: 1,
+      };
+
       try {
         const response = await fetch("http://localhost:8000/sporadic", {
           method: "POST",
@@ -183,10 +196,16 @@ export default function MyAgenda() {
     } else if (medicineType === "treatment") {
       const data = {
         name: treatmentName,
-        startDate: treatmentStartDate.toISOString().split("T")[0],
-        meals: treatmentMeals,
-        duration: treatmentDuration,
+        cantidad: parseInt(treatmentDose),
+        moments: [
+          treatmentMeals.desayuno,
+          treatmentMeals.comida,
+          treatmentMeals.cena,
+        ],
+        inicio: treatmentStartDate.toISOString(),
+        duration_days: parseInt(treatmentDuration),
       };
+
       try {
         const response = await fetch("http://localhost:8000/treatments", {
           method: "POST",
@@ -215,9 +234,7 @@ export default function MyAgenda() {
       {["desayuno", "comida", "cena"].map((meal) => (
         <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
           <View className="mb-4">
-            <Text className="text-2xl font-semibold mb-2 capitalize">
-              {meal}
-            </Text>
+            <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
             {renderMedicineList(meal, medsTaken[meal])}
             <Button
               appearance="outline"
@@ -235,10 +252,7 @@ export default function MyAgenda() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
-        <Text
-          className="text-center my-4"
-          style={{ fontSize: 20, fontWeight: "bold" }}
-        >
+        <Text className="text-center my-4" style={{ fontSize: 20, fontWeight: "bold" }}>
           Agenda
         </Text>
         <Agenda
@@ -282,15 +296,14 @@ export default function MyAgenda() {
                 style={{ marginBottom: 10 }}
               />
               <Input
-                label="Dosis"
-                placeholder="Ej: Ibuprofeno 1g"
+                label="Cantidad"
+                placeholder="Dosis (ej: 1)"
                 value={sporadicDose}
                 onChangeText={setSporadicDose}
+                keyboardType="numeric"
                 style={{ marginBottom: 10 }}
               />
-              <Text style={{ marginBottom: 10 }}>
-                Momento: {selectedMeal}
-              </Text>
+              <Text style={{ marginBottom: 10 }}>Momento: {selectedMeal}</Text>
             </>
           ) : (
             <>
@@ -299,6 +312,14 @@ export default function MyAgenda() {
                 placeholder="Nombre del medicamento"
                 value={treatmentName}
                 onChangeText={setTreatmentName}
+                style={{ marginBottom: 10 }}
+              />
+              <Input
+                label="Cantidad"
+                placeholder="Dosis (ej: 1)"
+                value={treatmentDose}
+                onChangeText={setTreatmentDose}
+                keyboardType="numeric"
                 style={{ marginBottom: 10 }}
               />
               <Datepicker

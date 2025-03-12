@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorCollection
 from app.crud.meds import add_sporadic_medication, add_treatment
 from app.database import get_database
-from app.schemas.meds import SporadicMedicationCreate, TreatmentCreate
+from app.schemas.meds import Medication 
 from app.services.cima import (
     obtener_medicamento_por_codigo,
     obtener_medicamento_por_nombre,
@@ -36,7 +36,7 @@ def autocomplete_meds(name: str):
 
 @meds_router.post("/sporadic", status_code=status.HTTP_201_CREATED)
 async def create_sporadic_medication(
-    medication: SporadicMedicationCreate,
+    medication: Medication,
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
@@ -58,7 +58,7 @@ async def create_sporadic_medication(
 
 @meds_router.post("/treatments", status_code=status.HTTP_201_CREATED)
 async def create_treatment(
-    treatment: TreatmentCreate,
+    treatment: Medication,
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
