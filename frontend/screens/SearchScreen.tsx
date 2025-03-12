@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
 import BarCodeSearch from "components/BarCodeSearch";
@@ -61,33 +61,53 @@ const SearchScreen = () => {
       </View>
 
       {/* Lista de sugerencias */}
-      <SuggestionsList 
-        className="bg-white p-3 rounded-lg shadow-md border border-gray-200"
-        suggestions={suggestions} 
-        onSelect={(name) => setQuery(name)} 
-      />
+      {suggestions.length > 0 && (
+        <View className="mb-4">
+          <SuggestionsList 
+          className="bg-white p-3 rounded-lg shadow-md border border-gray-200"
+          suggestions={suggestions} 
+          onSelect={(name) => setQuery(name)} />
+        </View>
+      )}
 
       {/* Indicador de carga */}
       {loading && <ActivityIndicator size="large" color="#007AFF" className="mt-4" />}
 
-      {/* Información del medicamento */}
-      {medData && (
-        <View className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300">
-          <Text className="text-xl font-bold text-blue-900">💊 {medData.nombre}</Text>
-          <Text className="text-gray-600 mt-2">🏭 <Text className="font-semibold">Laboratorio:</Text> {medData.labtitular}</Text>
-          <Text className="text-gray-600 mt-1">📝 <Text className="font-semibold">Vía de administración:</Text> {medData.viasAdministracion[0]?.nombre}</Text>
-          <Text className="text-gray-600 mt-1">🏷️ <Text className="font-semibold">Forma farmacéutica:</Text> {medData.formaFarmaceutica?.nombre}</Text>
-          <Text className="text-gray-600 mt-1">🔹 <Text className="font-semibold">Dosis:</Text> {medData.dosis}</Text>
-          <Text className="text-gray-600 mt-1">📜 <Text className="font-semibold">Prescripción:</Text> {medData.cpresc}</Text>
-        </View>
-      )}
+      {/* 🛠️ Se agregó <ScrollView> para evitar errores */}
+      <ScrollView className="mt-4">
+        {medData && medData.map((medicamento, index) => (
+          <View 
+            key={index} 
+            className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300 flex-row items-center"
+          >
+            {/* Contenido de texto */}
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-blue-900">💊 {medicamento.nombre}</Text>
+              <Text className="text-gray-600 mt-2">🏭 <Text className="font-semibold">Laboratorio:</Text> {medicamento.labtitular}</Text>
+              <Text className="text-gray-600 mt-1">📝 <Text className="font-semibold">Vía de administración:</Text> {medicamento.viasAdministracion[0]?.nombre}</Text>
+              <Text className="text-gray-600 mt-1">🏷️ <Text className="font-semibold">Forma farmacéutica:</Text> {medicamento.formaFarmaceutica?.nombre}</Text>
+              <Text className="text-gray-600 mt-1">🔹 <Text className="font-semibold">Dosis:</Text> {medicamento.dosis}</Text>
+              <Text className="text-gray-600 mt-1">📜 <Text className="font-semibold">Prescripción:</Text> {medicamento.cpresc}</Text>
+            </View>
 
-      {/* Mensaje de error si no se encuentra el medicamento */}
-      {!loading && medData === null && query !== "" && (
-        <Text className="mt-5 text-lg text-red-600 text-center font-semibold">
-          ⚠️ Medicamento no encontrado
-        </Text>
-      )}
+            {/* Imagen del medicamento */}
+            {medicamento.fotos?.[0]?.url && (
+              <Image 
+                source={{ uri: medicamento.fotos[0].url }} 
+                className="w-20 h-20 ml-4 rounded-lg border border-gray-300"
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        ))}
+
+        {/* Mensaje de error si no se encuentra el medicamento */}
+        {!loading && medData === null && query !== "" && (
+          <Text className="mt-5 text-lg text-red-600 text-center font-semibold">
+            ⚠️ Medicamento no encontrado
+          </Text>
+        )}
+      </ScrollView>
     </View>
   );
 };
