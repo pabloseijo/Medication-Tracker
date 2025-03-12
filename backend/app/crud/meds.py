@@ -1,10 +1,10 @@
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorCollection
-from app.schemas.meds import SporadicMedicationCreate, TreatmentCreate
+from app.schemas.meds import Medication
 
 
 async def add_sporadic_medication(
-    collection: AsyncIOMotorCollection, medication: SporadicMedicationCreate
+    collection: AsyncIOMotorCollection, medication: Medication
 ) -> Optional[str]:
     """Añade una toma de medicamentos para el usuario asociado."""
 
@@ -14,7 +14,7 @@ async def add_sporadic_medication(
 
 
 async def add_treatment(
-    collection: AsyncIOMotorCollection, treatment: TreatmentCreate
+    collection: AsyncIOMotorCollection, treatment: Medication
 ) -> Optional[str]:
     """Añade un tratamiento para el usuario asoaciado"""
 
