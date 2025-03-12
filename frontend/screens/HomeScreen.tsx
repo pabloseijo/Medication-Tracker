@@ -79,9 +79,6 @@ export default function HomeScreen() {
     return list;
   };
 
-
-
-
   const loadItemsForDay = async (day: DateData) => {
     console.log("Cargando eventos para el día:", day.dateString);
     const [year, month, dayNum] = day.dateString.split("-").map(Number);
@@ -143,20 +140,7 @@ export default function HomeScreen() {
     }));
   };
 
-  // Función para renderizar la lista de tratamientos filtrados por comida y día
-  const getTreatmentsForMeal = (meal: string, date: Date): Treatment[] => {
-    return treatments.filter((treatment) => {
-      const treatmentEnd = new Date(treatment.startDate);
-      treatmentEnd.setDate(treatmentEnd.getDate() + treatment.duration);
-      // El tratamiento está activo si la fecha se encuentra entre el inicio y el final
-      if (date < treatment.startDate || date > treatmentEnd) return false;
-      // Y se debe tomar en la comida indicada
-      return treatment.meals[meal];
-    });
-  };
-
-
-  // 📌 Renderiza la lista de medicamentos con swipe
+  // Renderiza la lista de medicamentos con swipe
   const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
     return Object.keys(meds).map((med) => (
       <View key={med} className="relative mb-2">
