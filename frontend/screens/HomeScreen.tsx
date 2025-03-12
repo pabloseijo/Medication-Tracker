@@ -255,7 +255,7 @@ export default function HomeScreen() {
         <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
           <View className="mb-4">
             <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
-            {renderMedicineList(meal, medsTaken[meal])}
+            {renderMedicineList(meal, medsTaken[meal as MealType])}
             <Button appearance="outline" status="info" onPress={() => openAddMedicineModal(meal)}>
               + Añadir Medicamento
             </Button>
