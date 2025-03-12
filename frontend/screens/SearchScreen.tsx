@@ -72,13 +72,17 @@ const SearchScreen = () => {
       {loading && <ActivityIndicator size="large" color="#007AFF" className="mt-4" />}
 
       {/* Información del medicamento */}
-      {medData && (
-        <View className="mt-5 p-4 bg-white rounded-lg shadow-md">
-          <Text className="text-lg font-bold">📌 Nombre: {medData.nombre}</Text>
-          <Text className="text-gray-600">📝 Via: {medData.viasAdministracion[0].nombre}</Text>
-          <Text className="text-gray-600">🏷️ Categoría: {medData.formaFarmaceutica.nombre}</Text>
+
+    {medData && (
+      <View className="mt-5 p-4 bg-white rounded-lg shadow-md">
+        <Text className="text-lg font-bold"> Nombre: {medData.nombre}</Text>
+        <Text className="text-gray-600"> Laboratorio: {medData.labtitular}</Text>
+        <Text className="text-gray-600"> Vía de administración: {medData.viasAdministracion[0]?.nombre}</Text>
+        <Text className="text-gray-600"> Forma farmacéutica: {medData.formaFarmaceutica?.nombre}</Text>
+        <Text className="text-gray-600"> Dosis: {medData.dosis}</Text>
+        <Text className="text-gray-600"> Prescripción: {medData.cpresc}</Text>
         </View>
-      )}
+    )}
 
       {/* Mensaje de error si no se encuentra el medicamento */}
       {!loading && medData === null && query !== "" && (
