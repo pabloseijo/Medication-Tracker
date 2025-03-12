@@ -1,9 +1,19 @@
 import React, { useState } from "react";
-import { ScrollView, View, SafeAreaView } from "react-native";
+import {
+  ScrollView,
+  View,
+  SafeAreaView,
+  Animated,
+  Text as RNText,
+} from "react-native";
 import { Text, Card, Button } from "@ui-kitten/components";
-import { Agenda, DateData, AgendaEntry, AgendaSchedule } from "react-native-calendars";
+import { Agenda, DateData } from "react-native-calendars";
 import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
+import {
+  Swipeable,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 // 🔹 Definimos correctamente el tipo de los eventos
 
@@ -45,64 +55,84 @@ export default function MyAgenda() {
     }
   };
 
+    // 🔹 Función para eliminar medicamento con swipe
+  const removeMedicine = (meal: string, med: string) => {
+    setMedsTaken((prev) => {
+      const newMeds = { ...prev };
+      delete newMeds[meal][med];
+      return newMeds;
+    });
+  };
+
+  const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
+    return Object.keys(meds).map((med) => (
+      <View key={med} className="relative mb-2">
+        {/* 🔴 Botón de eliminar detrás de la tarjeta */}
+        <View className="absolute inset-0 h-full bg-red-500 flex justify-center items-end pr-5 rounded-lg">
+          <RNText className="text-white font-bold text-lg">Borrar</RNText>
+        </View>
+  
+        <Swipeable
+          friction={2} // Suaviza la animación
+          rightThreshold={60} // Cuánto arrastrar antes de activarse
+          onSwipeableOpen={() => removeMedicine(meal, med)}
+          renderRightActions={(progress, dragX) => {
+            const translateX = dragX.interpolate({
+              inputRange: [-100, 0], 
+              outputRange: [-100, 0], // Desplazamiento smooth
+              extrapolate: "clamp",
+            });
+  
+            return (
+              <Animated.View
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  transform: [{ translateX }],
+                }}
+              />
+            );
+          }}
+        >
+          {/* 🔹 Tarjeta del medicamento */}
+            <MedicineCard
+              name={med}
+              taken={meds[med]}
+              onPress={() => toggleMedicine(meal, med)}
+            />
+        </Swipeable>
+      </View>
+    ));
+  };
+  
+  
+  
+  
+  
+
   // 🔹 Mensaje cuando no hay eventos
+  
+  // 🔹 Renderizar la vista vacía con medicamentos y swipe
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
-      {(
-        <>
-          <Card className="mb-4 p-4">
-            <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
-          </Card>
+      <Card className="mb-4 p-4 shadow-lg rounded-lg">
+        <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
+      </Card>
 
-          {/* 🔹 Sección de Medicamentos */}
-          <Card className="mb-4 p-4">
-            <View className="mb-4">
-              <Text className="text-xl font-semibold mb-2">Desayuno</Text>
-              <MedicineCard
-                name="Ibuprofeno"
-                taken={medsTaken.desayuno.ibuprofeno}
-                onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
-              />
-              <MedicineCard
-                name="Omeprazol"
-                taken={medsTaken.desayuno.omeprazol}
-                onPress={() => toggleMedicine("desayuno", "omeprazol")}
-              />
-              <Button appearance="outline" status="info">
-                + Añadir Medicamento
-              </Button>
-            </View>
-          </Card>
-
-          <Card className="mb-4 p-4">
-            <View className="mb-4">
-              <Text className="text-xl font-semibold mb-2">Comida</Text>
-              <MedicineCard
-                name="Paracetamol"
-                taken={medsTaken.comida.paracetamol}
-                onPress={() => toggleMedicine("comida", "paracetamol")}
-              />
-              <Button appearance="outline" status="info">
-                + Añadir Medicamento
-              </Button>
-            </View>
-          </Card>
-
-          <Card className="mb-4 p-4">
-            <View className="mb-4">
-              <Text className="text-xl font-semibold mb-2">Cena</Text>
-              <MedicineCard
-                name="Vitamina C"
-                taken={medsTaken.cena.vitaminaC}
-                onPress={() => toggleMedicine("cena", "vitaminaC")}
-              />
-              <Button appearance="outline" status="info">
-                + Añadir Medicamento
-              </Button>
-            </View>
-          </Card>
-        </>
-      )}
+      {/* 🔹 Sección de Medicamentos */}
+      {["desayuno", "comida", "cena"].map((meal) => (
+        <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
+          <View className="mb-4">
+            <Text className="text-2xl font-semibold mb-2 capitalize">
+              {meal}
+            </Text>
+            {renderMedicineList(meal, medsTaken[meal])}
+            <Button appearance="outline" status="info">
+              + Añadir Medicamento
+            </Button>
+          </View>
+        </Card>
+      ))}
     </ScrollView>
   );
 
