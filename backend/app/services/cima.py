@@ -29,7 +29,19 @@ def obtener_medicamento_por_nombre(nombre):
         return medicamentos["resultados"][0]
     else:
         return None
-
+    
+def obtener_medicamentos_por_nombre(nombre):
+    '''
+    Obtiene un array de JSONs con la información del medicamento buscado por nombre.
+    EJEMPLO: "actron"
+    '''
+    url = f"https://cima.aemps.es/cima/rest/medicamentos?nombre={nombre}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        medicamentos = response.json()
+        return medicamentos["resultados"]
+    else:
+        return None
 
 def mostrar_FichaTecnica(codigo_nacional):
     """
