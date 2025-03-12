@@ -84,7 +84,7 @@ export default function BarcodeScannerScreen() {
       {/* 🔹 Contenedor fijo para el título y la cámara */}
       <div className="flex flex-col items-center justify-center flex-none h-auto sticky top-0 bg-gray-100 z-10">
         {/* 🔹 Título */}
-        <h2 className="text-xl font-bold mb-4">Escáner de Código de Barras</h2>
+        <h2 className="text-xl font-bold mt-8 mb-4">Escáner de Código de Barras</h2>
   
         {/* 🔹 Contenedor del video */}
         <div className="relative w-4/5 max-w-md flex items-center justify-center">
@@ -120,9 +120,6 @@ export default function BarcodeScannerScreen() {
                 Ficha Técnica
               </a>
             </p>
-            {medData.fotos?.length > 0 && (
-              <img src={medData.fotos[0].url} alt="Medicamento" className="mt-4 w-32 h-32 object-cover" />
-            )}
           </div>
         )}
   

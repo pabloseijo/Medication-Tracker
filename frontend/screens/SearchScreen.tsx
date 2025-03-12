@@ -47,18 +47,16 @@ const SearchScreen = () => {
 
   return (
     <View className="flex-1 p-6 bg-gray-50 space-y-6">
-      <View className="flex-row items-center space-x-4">
+      <View className="w-full">
         {/* Barra de búsqueda */}
         <SearchBar 
-          className="flex-1 bg-white p-3 rounded-lg shadow-md border border-gray-300"
+          className="w-full bg-white p-3 rounded-lg shadow-md border-gray-300"
           query={query} 
           setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
           onSearch={fetchMedData} 
         />
-
-        {/* Código de barras */}
-        <BarCodeSearch className="p-3 bg-blue-600 rounded-lg shadow-md" onPress={() => console.log("Escanear código de barras")} />
       </View>
+
 
       {/* Lista de sugerencias */}
       {suggestions.length > 0 && (
