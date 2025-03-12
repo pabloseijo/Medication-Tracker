@@ -32,7 +32,7 @@ export default function MedicineForm({
   const [sporadicDose, setSporadicDose] = useState("");
   const [treatmentName, setTreatmentName] = useState("");
   const [treatmentDose, setTreatmentDose] = useState("");
-  const [treatmentStartDate, setTreatmentStartDate] = useState(new Date());
+  const [treatmentStartDate, setTreatmentStartDate] = useState(selectedDate);
   const [treatmentDuration, setTreatmentDuration] = useState("");
   const [treatmentMeals, setTreatmentMeals] = useState({
     desayuno: false,
@@ -49,7 +49,7 @@ export default function MedicineForm({
             name: sporadicName.trim() || "Medicamento Desconocido",
             cantidad: isNaN(validSporadicDose) ? 1 : validSporadicDose,
             moments: [
-              selectedMeal === "desayuno", // 🔥 Ahora es una lista y no un objeto
+              selectedMeal === "desayuno", // Ahora es una lista y no un objeto
               selectedMeal === "comida",
               selectedMeal === "cena",
             ],
