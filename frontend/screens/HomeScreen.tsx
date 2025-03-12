@@ -1,62 +1,138 @@
 import React, { useState } from "react";
-import { ScrollView, View, SafeAreaView, Animated, Text as RNText } from "react-native";
-import { Text, Card, Button } from "@ui-kitten/components";
+import {
+  ScrollView,
+  View,
+  SafeAreaView,
+  Animated,
+  Text as RNText,
+} from "react-native";
+import {
+  Text,
+  Card,
+  Button,
+  Modal,
+  Input,
+  Datepicker,
+  Radio,
+  RadioGroup,
+  CheckBox,
+} from "@ui-kitten/components";
 import { Agenda, DateData } from "react-native-calendars";
 import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
-import MedicineForm from "../components/MedicineForm"; // ✅ Importamos el nuevo componente
+import MedicineForm from "../components/MedicineForm"; // Componente de formulario (si lo usas)
 import { Swipeable } from "react-native-gesture-handler";
 
-// Tipo de la lista de medicamentos
+// Definición de la interfaz Treatment que usaremos para mapear los datos
+interface Treatment {
+  name: string;            // Nombre del medicamento
+  dose: number;            // Dosis en mg
+  meals: {
+    desayuno: boolean;     // Ingesta en desayuno
+    comida: boolean;       // Ingesta en comida
+    cena: boolean;         // Ingesta en cena
+  };
+  startDate: Date;         // Fecha de inicio del tratamiento
+  duration: number;        // Duración del tratamiento (en días)
+}
+
 type MedicineList = {
   desayuno: { [key: string]: boolean };
   comida: { [key: string]: boolean };
   cena: { [key: string]: boolean };
 };
 
-export default function HomeScreen() {
-  const [medsTaken, setMedsTaken] = useState<MedicineList>({
-    desayuno: { ibuprofeno: false, omeprazol: false },
-    comida: { paracetamol: false },
-    cena: { vitaminaC: false },
-  });
 
+export default function HomeScreen() {
+  // Estado para almacenar los tratamientos (resultado del GET)
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
+
+  // Estado para almacenar el día seleccionado en el calendario
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Estados para el modal y formulario (para agregar nuevos tratamientos)
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<string>("");
 
-  // 📌 Cargar eventos de un día específico
-  const loadItemsForDay = (day: DateData) => {
-    console.log("Cargando eventos para el día:", day.dateString);
-    updateMedsForDay(day.dateString);
+  // (Opcional) Si sigues usando tomas esporádicas en otra estructura, lo puedes eliminar
+  const [medsTaken, setMedsTaken] = useState<{ [key: string]: any }>({
+    desayuno: {},
+    comida: {},
+    cena: {},
+  });
+
+  const buildMedicineList = (treatments: Treatment[]): MedicineList => {
+    const list: MedicineList = { desayuno: {}, comida: {}, cena: {} };
+    treatments.forEach((treatment) => {
+      // Si el tratamiento debe tomarse en desayuno, agrega su nombre con valor false
+      if (treatment.meals.desayuno) {
+        list.desayuno[treatment.name] = false;
+      }
+      // Lo mismo para comida y cena
+      if (treatment.meals.comida) {
+        list.comida[treatment.name] = false;
+      }
+      if (treatment.meals.cena) {
+        list.cena[treatment.name] = false;
+      }
+    });
+    return list;
   };
 
-  // 📌 Actualiza la lista de medicamentos según el día
-  const updateMedsForDay = (selectedDay: string) => {
-    if (selectedDay === "2025-03-10") {
-      setMedsTaken({
-        desayuno: { ibuprofeno: false, omeprazol: false },
-        comida: { paracetamol: false },
-        cena: { vitaminaC: false },
-      });
-    } else if (selectedDay === "2025-03-11") {
-      setMedsTaken({
-        desayuno: { ibuprofeno: true, omeprazol: false },
-        comida: { paracetamol: false },
-        cena: { vitaminaC: true },
-      });
+  const loadItemsForDay = async (day: DateData) => {
+    console.log("Cargando eventos para el día:", day.dateString);
+    const [year, month, dayNum] = day.dateString.split("-").map(Number);
+    const localDate = new Date(year, month - 1, dayNum);
+    setSelectedDate(localDate);
+
+    try {
+      const response = await fetch("http://localhost:8000/sporadic");
+      if (response.ok) {
+        const data = await response.json();
+        const mappedTreatments: Treatment[] = data.map((item: any) => ({
+          name: item.name,
+          dose: item.cantidad,
+          meals: {
+            desayuno: item.moments[0],
+            comida: item.moments[1],
+            cena: item.moments[2],
+          },
+          startDate: new Date(item.inicio),
+          duration: item.duration_days,
+        }));
+        setTreatments(mappedTreatments);
+
+        // Filtramos los tratamientos activos para la fecha seleccionada
+        const activeTreatments: Treatment[] = mappedTreatments.filter((treatment) => {
+          const treatmentEnd = new Date(treatment.startDate);
+          treatmentEnd.setDate(treatmentEnd.getDate() + treatment.duration);
+          return localDate >= treatment.startDate && localDate <= treatmentEnd;
+        });
+        // Convertimos el array filtrado a la estructura MedicineList
+        const medicineList: MedicineList = buildMedicineList(activeTreatments);
+        // Actualizamos el estado para la visualización
+        setMedsTaken(medicineList);
+
+        // Imprime en consola para ver el resultado
+        console.log("Formato final:", medicineList);
+      } else {
+        console.error("Error en GET sporadic: ", response.status);
+      }
+    } catch (error) {
+      console.error("Error al obtener sporadic: ", error);
     }
   };
 
-  // 📌 Elimina un medicamento de la lista
-  const removeMedicine = (meal: string, med: string) => {
-    setMedsTaken((prev) => {
-      const newMeds = { ...prev };
-      delete newMeds[meal][med];
-      return newMeds;
-    });
-  };
+    // Elimina un medicamento de la lista
+    const removeMedicine = (meal: string, med: string) => {
+      setMedsTaken((prev) => {
+        const newMeds = { ...prev };
+        delete newMeds[meal][med];
+        return newMeds;
+      });
+    };
 
-  // 📌 Alterna el estado de un medicamento (tomado/no tomado)
+  // Función para cambiar el estado de los medicamentos
   const toggleMedicine = (meal: string, med: string) => {
     setMedsTaken((prev) => ({
       ...prev,
@@ -64,7 +140,7 @@ export default function HomeScreen() {
     }));
   };
 
-  // 📌 Renderiza la lista de medicamentos con swipe
+  // Renderiza la lista de medicamentos con swipe
   const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
     return Object.keys(meds).map((med) => (
       <View key={med} className="relative mb-2">
@@ -92,42 +168,41 @@ export default function HomeScreen() {
     ));
   };
 
-  // 📌 Abre el modal y define la comida seleccionada
+  // Abre el modal para agregar medicamento y define la comida seleccionada
   const openAddMedicineModal = (meal: string) => {
     setSelectedMeal(meal);
     setModalVisible(true);
   };
 
-  // 📌 Guarda un medicamento en el backend
-  const saveMedicine = async (data: any) => {
+  // Función para guardar un medicamento (aquí solo se muestra el envío a la API)
+  const saveMedicine = async (selectedDate: any) => {
     try {
-      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(data, null, 2));
-  
+      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(selectedDate, null, 2));
+
       const response = await fetch("http://localhost:8000/sporadic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(selectedDate),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error en la API: ${response.status} - ${errorText}`);
       }
-  
+
       console.log("✅ Medicamento guardado correctamente.");
     } catch (error) {
       console.error("❌ Error al guardar el medicamento:", error);
     }
   };
-  
 
-  // 📌 Renderiza la vista vacía con medicamentos y botones para agregar
+  // Renderiza la vista vacía con tratamientos y botón para agregar
   const renderEmptyData = () => (
     <ScrollView className="flex-1">
       <Card className="mb-4 p-4 shadow-lg rounded-lg">
-        <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
+        <StatsOverview progress={0.7} medsTaken={0} medsTotal={0} />
       </Card>
       {["desayuno", "comida", "cena"].map((meal) => (
         <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
@@ -147,11 +222,26 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
         <Text className="text-center my-4 text-2xl font-bold">Agenda</Text>
-        <Agenda showOnlySelectedDayItems={true} onDayPress={loadItemsForDay} renderEmptyData={renderEmptyData} />
+        <Agenda
+          showOnlySelectedDayItems={true}
+          onDayPress={loadItemsForDay}
+          renderEmptyData={renderEmptyData}
+          theme={{
+            agendaDayTextColor: "blue",
+            agendaTodayColor: "red",
+            agendaKnobColor: "green",
+          }}
+        />
       </View>
 
-      {/* ✅ Integración del formulario de medicamentos */}
-      <MedicineForm isVisible={isModalVisible} onClose={() => setModalVisible(false)} onSave={saveMedicine} selectedMeal={selectedMeal} />
+      {/* Integración del formulario de medicamentos */}
+      <MedicineForm
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={saveMedicine}
+        selectedMeal={selectedMeal}
+        selectedDate={selectedDate}
+      />
     </SafeAreaView>
   );
 }
