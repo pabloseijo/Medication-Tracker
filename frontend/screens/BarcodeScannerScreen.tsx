@@ -90,12 +90,19 @@ export default function BarcodeScannerScreen() {
       )}
 
       {medData && (
-        <div className="mt-4 p-4 bg-blue-200 text-blue-800 rounded text-lg font-semibold">
-          <p>Medicamento: {medData.nombre}</p>
-          <p>Pactivos: {medData.pactivos}</p>
-        </div>
+          <div className="mt-4 p-4 bg-blue-200 text-blue-800 rounded text-lg font-semibold">
+          <p><strong>Medicamento:</strong> {medData.nombre}</p>
+          <p><strong>Principios Activos:</strong> {medData.pactivos}</p>
+          <p><strong>Laboratorio:</strong> {medData.labtitular}</p>
+          <p><strong>Prescripción:</strong> {medData.cpresc}</p>
+          <p><strong>Forma Farmacéutica:</strong> {medData.formaFarmaceutica?.nombre}</p>
+          <p><strong>Vía de Administración:</strong> {medData.viasAdministracion?.map(via => via.nombre).join(", ")}</p>
+          <p><strong>Información Adicional:</strong> <a href={medData.docs?.[0]?.urlHtml} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Ficha Técnica</a></p>
+          {medData.fotos?.length > 0 && (
+              <img src={medData.fotos[0].url} alt="Medicamento" className="mt-4 w-32 h-32 object-cover" />
+          )}
+          </div>
       )}
-
       {error && (
         <p className="mt-4 p-2 bg-red-200 text-red-800 rounded text-lg font-semibold">
           Error: {error}
