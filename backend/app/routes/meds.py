@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorCollection
-from app.crud.meds import add_sporadic_medication
+from app.crud.meds import add_sporadic_medication, add_treatment
 from app.database import get_database
-from app.schemas.meds import SporadicMedicationCreate
+from app.schemas.meds import SporadicMedicationCreate, TreatmentCreate
 from app.services.cima import (
     obtener_medicamento_por_codigo,
     obtener_medicamento_por_nombre,
@@ -39,11 +39,36 @@ async def create_sporadic_medication(
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
-        # Convertir date y time a datetime
+        mock_user = await db.users.find_one({"email": "mock@example.com"})
+        if not mock_user:
+            return None
 
+        medication.user_id = mock_user["_id"]
         result = await add_sporadic_medication(db.sporadic_medication, medication)
         if not result:
             raise ValueError("No se ha podido insertar la medicación")
+
+        return {"id": str(result)}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@meds_router.post("/treatments", status_code=status.HTTP_201_CREATED)
+async def create_treatment(
+    treatment: TreatmentCreate,
+    db: AsyncIOMotorCollection = Depends(get_database),
+):
+    try:
+        mock_user = await db.users.find_one({"email": "mock@example.com"})
+        if not mock_user:
+            return None
+
+        treatment.user_id = mock_user["_id"]
+        result = await add_treatment(db.treatments, treatment)
+        if not result:
+            raise ValueError("No se ha podido insertar el tratamiento")
 
         return {"id": str(result)}
     except Exception as e:

@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
-from datetime import date, datetime
+from datetime import datetime
 
 
 class SporadicMedicationCreate(BaseModel):
@@ -14,7 +14,7 @@ class SporadicMedicationCreate(BaseModel):
 class TreatmentCreate(BaseModel):
     user_id: Optional[str]
     name: str
-    start_date: date
+    start_date: datetime
     frequency_amount: int
     frequency_unit: str
     duration_days: int
