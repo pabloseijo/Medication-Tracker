@@ -17,6 +17,7 @@ interface MedicineFormProps {
   onClose: () => void;
   onSave: (data: any) => void;
   selectedMeal: string;
+  selectedDate: any;
 }
 
 export default function MedicineForm({
@@ -24,6 +25,7 @@ export default function MedicineForm({
   onClose,
   onSave,
   selectedMeal,
+  selectedDate
 }: MedicineFormProps) {
   const [medicineType, setMedicineType] = useState<"sporadic" | "treatment">("sporadic");
   const [sporadicName, setSporadicName] = useState("");
@@ -51,7 +53,7 @@ export default function MedicineForm({
               selectedMeal === "comida",
               selectedMeal === "cena",
             ],
-            inicio: new Date().toISOString(),
+            inicio: selectedDate.toISOString(),
             duration_days: 1,
           }
         : {
