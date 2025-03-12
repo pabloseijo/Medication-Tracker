@@ -6,6 +6,7 @@ from app.schemas.meds import SporadicMedicationCreate, TreatmentCreate
 from app.services.cima import (
     obtener_medicamento_por_codigo,
     obtener_medicamento_por_nombre,
+    obtener_medicamentos_por_nombre,
 )
 from app.services.typesense import search_medications
 
@@ -29,7 +30,8 @@ def search_meds(q: str = Query(..., description="Nombre del medicamento")):
 
 @meds_router.get("/med_name")
 def autocomplete_meds(name: str):
-    med = obtener_medicamento_por_nombre(name)
+    # med = obtener_medicamento_por_nombre(name)
+    med = obtener_medicamentos_por_nombre(name) # Array de medicamentos
     return med
 
 @meds_router.post("/sporadic", status_code=status.HTTP_201_CREATED)
