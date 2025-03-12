@@ -25,3 +25,5 @@ def search_meds(q: str = Query(..., description="Nombre del medicamento")):
 def autocomplete_meds(name: str):
     med = obtener_medicamento_por_nombre(name)
     return med
+
+
