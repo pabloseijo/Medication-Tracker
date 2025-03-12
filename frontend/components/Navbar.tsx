@@ -7,6 +7,7 @@ import { Icon } from "react-native-elements";
 import HomeScreen from "../screens/HomeScreen";
 import SearchScreen from "../screens/SearchScreen";
 import UserScreen from "screens/UserScreen";
+import BarcodeScannerScreen from "screens/BarcodeScannerScreen";
 
 // Crea el Tab Navigator
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,8 @@ export default function Navbar() {
               iconName = "magnify";
             } else if (route.name === "Perfil") {
                 iconName = "account";
+            } else if (route.name === "BarcodeScanner") {
+              iconName = "barcode-scan";
             }
 
             return <Icon name={iconName} type="material-community" color={color} size={size} />;
@@ -38,6 +41,7 @@ export default function Navbar() {
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Buscar" component={SearchScreen} />
         <Tab.Screen name="Perfil" component={UserScreen} />
+        <Tab.Screen name="BarcodeScanner" component={BarcodeScannerScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
