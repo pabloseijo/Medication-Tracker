@@ -168,14 +168,20 @@ export default function UserScreen() {
             {/* 🔹 Guardar cambios */}
             <Button title="Guardar Cambios" color="blue" onPress={handleSave} />
 
-            {/* 🔹 Línea Divisoria */}
-            <View className="border-b border-gray-300 my-6" />
+            {/* 🔹 Renderizar solo si el usuario es médico */}
+            {user.isMedic && (
+                <>
+                    {/* 🔹 Línea Divisoria */}
+                    <View className="border-b border-gray-300 my-6" />
 
-            {/* 🔹 Sección de pacientes, si el usuario es médico */}
-            {user.isMedic && <PatientsComponent isMedic={user.isMedic} patients={user.patients || []} />}
+                    {/* 🔹 Sección de pacientes */}
+                    <PatientsComponent isMedic={user.isMedic} patients={user.patients || []} />
 
-            {/* 🔹 Línea Divisoria */}
-            <View className="border-b border-gray-300 mt-12 my-6" />
+                    {/* 🔹 Línea Divisoria */}
+                    <View className="border-b border-gray-300 mt-12 my-6" />
+                </>
+            )}
+
 
         </ScrollView>
     );

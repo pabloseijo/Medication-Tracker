@@ -35,7 +35,7 @@ async def login(user: UserLogin, db: AsyncIOMotorCollection = Depends(get_databa
 @user_router.get("/profile", response_model=UserUpdate, status_code=status.HTTP_200_OK)
 async def get_profile(db: AsyncIOMotorCollection = Depends(get_database)):
     try:
-        return await get_user_data(db.users, "mock@example.com")
+        return await get_user_data(db.users, "medic@example.com")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -43,6 +43,6 @@ async def get_profile(db: AsyncIOMotorCollection = Depends(get_database)):
 @user_router.put("/profile", status_code=status.HTTP_200_OK)
 async def update(user: UserUpdate, db: AsyncIOMotorCollection = Depends(get_database)):
     try:
-        await update_user(db.users, user, "mock@example.com")
+        await update_user(db.users, user, "medic@example.com")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
