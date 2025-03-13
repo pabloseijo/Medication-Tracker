@@ -32,7 +32,6 @@ async def login(user: UserLogin, db: AsyncIOMotorCollection = Depends(get_databa
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @user_router.get("/profile", response_model=UserUpdate, status_code=status.HTTP_200_OK)
 async def get_profile(db: AsyncIOMotorCollection = Depends(get_database)):
     try:

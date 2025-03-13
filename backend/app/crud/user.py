@@ -31,7 +31,6 @@ async def login_user(
     if user and verify_password(user.password, existing_user["hashed_password"]):
         return str(existing_user["_id"])
 
-
 async def update_user(
     collection: AsyncIOMotorCollection, user: UserUpdate, email: str
 ) -> Optional[str]:

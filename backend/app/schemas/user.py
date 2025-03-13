@@ -17,7 +17,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-
 class UserUpdate(BaseModel):
     name: str
     surname: str
@@ -26,7 +25,6 @@ class UserUpdate(BaseModel):
     weight: float
     diabetes: bool
     hypertension: bool
-
 
 class Token(BaseModel):
     access_token: str

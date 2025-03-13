@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
@@ -10,7 +11,6 @@ const SearchScreen = () => {
   const [medData, setMedData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
 
   // 🟢 Llamada a la API para obtener sugerencias (autocompletado)
   const fetchSuggestions = async (text: string) => {

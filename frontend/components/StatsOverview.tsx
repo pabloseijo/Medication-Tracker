@@ -28,7 +28,7 @@ export default function StatsOverview({
   ) {
     return null; 
   }
-
+    
   const remainingMeds = medsTotal - medsTaken;
 
   return (

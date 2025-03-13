@@ -9,8 +9,6 @@ client = typesense.Client({
     "connection_timeout_seconds": 5
 })
 
-
-
 # Crear la colección de medicamentos en Typesense si no existe
 def create_meds_collection():
     collection_name = "medications"
@@ -42,7 +40,6 @@ def delete_medications_collection():
         print(f"Error al eliminar la colección: {e}")
 
 def insert_meds():
-  
     medications = [
         {"name": "Paracetamol"},
         {"name": "Ibuprofeno"},
@@ -117,9 +114,6 @@ def insert_meds():
         print("Medicamentos insertados correctamente en la colección.")
     except Exception as e:
         print(f"Error al insertar medicamentos: {e}")
-
-
-
 
 # Función para buscar medicamentos con autocompletado
 def search_medications(query: str):

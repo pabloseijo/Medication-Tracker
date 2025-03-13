@@ -19,7 +19,6 @@ async def read_root(code: str):
     med = obtener_medicamento_por_codigo(code)
     return med
 
-
 # 🔎 Endpoint para autocompletado
 @meds_router.get("/search")
 def search_meds(q: str = Query(..., description="Nombre del medicamento")):
