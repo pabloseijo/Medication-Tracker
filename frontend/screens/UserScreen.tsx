@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Switch, Button, ScrollView, Alert, ActivityIndicator } from "react-native";
+import PatientsComponent from "../components/PatientsComponent";
 
 export default function UserScreen() {
     const [user, setUser] = useState({
@@ -10,6 +11,8 @@ export default function UserScreen() {
         weight: "",
         diabetes: false,
         hypertension: false,
+        isMedic: false,
+        patients: [], // ← Asegúrate de incluir la lista de pacientes
     });
     const [loading, setLoading] = useState(true)
 
@@ -29,6 +32,8 @@ export default function UserScreen() {
                     age: data.age?.toString() || "",
                     height: data.height?.toString() || "",
                     weight: data.weight?.toString() || "",
+                    isMedic: data.isMedic || false,
+                    patients: data.patients || [],
                 });
 
             } catch (error) {
@@ -96,7 +101,7 @@ export default function UserScreen() {
             {/* 🔹 Nombre */}
             <Text className="text-sm font-semibold">Nombre</Text>
             <TextInput
-                className="border border-gray-300 rounded-md p-2 mb-3"
+                className="border border-gray-300 rounded-xl p-2 mb-3 bg-gray-200 text-gray-700"
                 placeholder="Tu nombre"
                 value={user.name}
                 onChangeText={(text) => handleInputChange("name", text)}
@@ -105,7 +110,7 @@ export default function UserScreen() {
             {/* 🔹 Apellido */}
             <Text className="text-sm font-semibold">Apellido</Text>
             <TextInput
-                className="border border-gray-300 rounded-md p-2 mb-3"
+                className="border border-gray-300 rounded-xl p-2 mb-3 bg-gray-200 text-gray-700"
                 placeholder="Tu apellido"
                 value={user.surname}
                 onChangeText={(text) => handleInputChange("surname", text)}
@@ -114,7 +119,7 @@ export default function UserScreen() {
             {/* 🔹 Edad */}
             <Text className="text-sm font-semibold">Edad</Text>
             <TextInput
-                className="border border-gray-300 rounded-md p-2 mb-3"
+                className="border border-gray-300 rounded-xl p-2 mb-3 bg-gray-200 text-gray-700"
                 placeholder="Edad"
                 keyboardType="numeric"
                 value={user.age}
@@ -124,7 +129,7 @@ export default function UserScreen() {
             {/* 🔹 Altura */}
             <Text className="text-sm font-semibold">Altura (cm)</Text>
             <TextInput
-                className="border border-gray-300 rounded-md p-2 mb-3"
+                className="border border-gray-300 rounded-xl p-2 mb-3 bg-gray-200 text-gray-700"
                 placeholder="Altura en cm"
                 keyboardType="numeric"
                 value={user.height}
@@ -134,12 +139,13 @@ export default function UserScreen() {
             {/* 🔹 Peso */}
             <Text className="text-sm font-semibold">Peso (kg)</Text>
             <TextInput
-                className="border border-gray-300 rounded-md p-2 mb-3"
+                className="border border-gray-300 rounded-xl p-2 mb-3 bg-gray-200 text-gray-700"
                 placeholder="Peso en kg"
                 keyboardType="numeric"
                 value={user.weight}
                 onChangeText={(text) => handleInputChange("weight", text)}
             />
+
 
             {/* 🔹 Diabetes */}
             <View className="flex-row justify-between items-center mb-3">
@@ -161,6 +167,16 @@ export default function UserScreen() {
 
             {/* 🔹 Guardar cambios */}
             <Button title="Guardar Cambios" color="blue" onPress={handleSave} />
+
+            {/* 🔹 Línea Divisoria */}
+            <View className="border-b border-gray-300 my-6" />
+
+            {/* 🔹 Sección de pacientes, si el usuario es médico */}
+            {user.isMedic && <PatientsComponent isMedic={user.isMedic} patients={user.patients || []} />}
+
+            {/* 🔹 Línea Divisoria */}
+            <View className="border-b border-gray-300 mt-12 my-6" />
+
         </ScrollView>
     );
 }
