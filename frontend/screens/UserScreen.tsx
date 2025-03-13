@@ -175,7 +175,33 @@ export default function UserScreen() {
                     <View className="border-b border-gray-300 my-6" />
 
                     {/* 🔹 Sección de pacientes */}
-                    <PatientsComponent isMedic={user.isMedic} patients={user.patients || []} />
+                    <Text className="text-xl font-bold text-center my-4">Pacientes</Text>
+                    {user.patients.length > 0 ? (
+                        user.patients.map((patient, index) => (
+                            <View 
+                                key={index} 
+                                className="bg-white shadow-md rounded-lg p-4 mb-4 border border-gray-200"
+                            >
+                                <Text className="text-lg font-semibold text-blue-800">
+                                    {patient.name} {patient.surname}
+                                </Text>
+
+                                <Text className="text-gray-700 mt-1">🆎 <Text className="font-semibold">Edad:</Text> {patient.age} años</Text>
+                                <Text className="text-gray-700 mt-1">📏 <Text className="font-semibold">Altura:</Text> {patient.height} cm</Text>
+                                <Text className="text-gray-700 mt-1">⚖️ <Text className="font-semibold">Peso:</Text> {patient.weight} kg</Text>
+
+                                <Text className={`mt-2 font-semibold ${patient.diabetes ? "text-red-600" : "text-green-600"}`}>
+                                    {patient.diabetes ? "🩸 Diabetes: Sí" : "🩸 Diabetes: No"}
+                                </Text>
+
+                                <Text className={`mt-1 font-semibold ${patient.hypertension ? "text-red-600" : "text-green-600"}`}>
+                                    {patient.hypertension ? "❤️ Hipertensión: Sí" : "❤️ Hipertensión: No"}
+                                </Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text className="text-gray-500 text-center mt-2">No tienes pacientes asignados.</Text>
+                    )}
 
                     {/* 🔹 Línea Divisoria */}
                     <View className="border-b border-gray-300 mt-12 my-6" />
