@@ -2,9 +2,9 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.crud.messages import add_message, get_all_user_conversation
 from app.database import get_database
-from app.main import CURRENT_USER_EMAIL
 from app.schemas.messages import ChatMessage
 from app.services.chatbot import ChatbotService
+from app.utils.config import CURRENT_USER_EMAIL
 
 message_router = APIRouter()
 chatbot_service = ChatbotService()

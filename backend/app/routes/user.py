@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 
 from app.crud.user import create_user, get_user_data, login_user, update_user
 from app.database import get_database
-from app.main import CURRENT_USER_EMAIL
+from app.utils.config import CURRENT_USER_EMAIL
 from app.schemas.user import Token, UserCreate, UserLogin, UserUpdate
 from app.utils.security import create_access_token
 

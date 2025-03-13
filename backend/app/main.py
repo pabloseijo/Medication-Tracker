@@ -8,7 +8,6 @@ from app.services.typesense import create_meds_collection
 from app.utils.mock import create_mocks
 from app.routes.messages import message_router
 
-CURRENT_USER_EMAIL = "javier@gmail.com"
 
 
 @asynccontextmanager

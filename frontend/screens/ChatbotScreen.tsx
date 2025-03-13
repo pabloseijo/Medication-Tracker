@@ -3,6 +3,7 @@ import { View, ScrollView, Text, TouchableOpacity, TextInput } from "react-nativ
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
+import * as Speech from 'expo-speech';
 
 const API_URL = "http://localhost:8000/messages"; // Reemplaza con la URL de tu API
 
@@ -69,6 +70,13 @@ const ChatScreen: React.FC = () => {
       // Agregar la respuesta del chatbot al estado
       setMessages((prevMessages) => [...prevMessages, botResponse]);
 
+      // Reproducir la respuesta del bot en voz alta
+      Speech.speak(botResponse.text, {
+        language: 'es-ES', // Código de idioma para español de España
+        pitch: 1.0,        // Tono de la voz
+        rate: 1.0,         // Velocidad de la voz
+      });      
+
       // Si se produce un error ponemos un mensaje de error en el chat
     } catch (error) {
       console.error("Error al comunicarse con la API:", error);
@@ -77,6 +85,13 @@ const ChatScreen: React.FC = () => {
           sender: "bot",
       };
       setMessages((prevMessages) => [...prevMessages, botErrorResponse]);
+
+      // Reproducir el mensaje de error en voz alta
+      Speech.speak(botErrorResponse.text, {
+        language: 'es-ES', // Código de idioma para español de España
+        pitch: 1.0,        // Tono de la voz
+        rate: 1.0,         // Velocidad de la voz
+      });      
   }
 
     setInput(""); // 🔹 Limpiar el input después de enviar

@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import os
 
+CURRENT_USER_EMAIL = "javier@gmail.com"
+
 load_dotenv()
 
 TYPESENSE_API_KEY = os.getenv("TYPESENSE_API_KEY")
