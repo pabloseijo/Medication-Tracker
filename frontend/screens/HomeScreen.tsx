@@ -212,17 +212,21 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
 
-  // Función para guardar un medicamento (aquí solo se muestra el envío a la API)
-  const saveMedicine = async (selectedDate: any) => {
+  const year = selectedDate.getFullYear();
+  const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0'); // getMonth es 0-indexado
+  const day = selectedDate.getDate().toString().padStart(2, '0');
+  const dateString = `${year}-${month}-${day}`;
+
+  const saveMedicine = async (medData: any) => {
     try {
-      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(selectedDate, null, 2));
+      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(medData, null, 2));
 
       const response = await fetch("http://localhost:8000/sporadic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(selectedDate),
+        body: JSON.stringify(medData),
       });
 
       if (!response.ok) {
@@ -230,11 +234,21 @@ export default function HomeScreen() {
         throw new Error(`Error en la API: ${response.status} - ${errorText}`);
       }
 
-      console.log("✅ Medicamento guardado correctamente.");
+      console.log("✅ Medicamento guardado correctamente. en");
+
+      // Recarga los datos para reflejar el cambio, simulando un dayPress usando el estado selectedDate
+      loadItemsForDay({
+        dateString,
+        year,
+        month: Number(month),
+        day: Number(day),
+        timestamp: selectedDate.getTime(),
+      });
     } catch (error) {
       console.error("❌ Error al guardar el medicamento:", error);
     }
   };
+
 
   // Renderiza la vista vacía con tratamientos y botón para agregar
   const renderEmptyData = () => (
