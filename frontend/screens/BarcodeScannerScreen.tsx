@@ -86,10 +86,13 @@ export default function BarcodeScannerScreen() {
     }
   };
   
-
-  const handleSave = (data) => {
-    console.log("✅ Medicamento guardado:", data);
-    setIsModalOpen(false); // Cerrar el modal después de guardar
+  const handleSave = async (medData: any) => {
+    try {
+      console.log("✅ Medicamento guardado correctamente.");
+      setIsModalOpen(false); // Cerrar el modal después de guardar
+    } catch (error) {
+      console.error("❌ Error al guardar el medicamento:", error);
+    }
   };
 
   return (
@@ -151,6 +154,7 @@ export default function BarcodeScannerScreen() {
           isVisible={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSave}
+          loadItemsForDay={async (day) => { void day; }} // Simular la carga de medicamentos
           selectedMeal={"desayuno"}
           selectedDate={new Date()} // Pasa la fecha actual
         />
