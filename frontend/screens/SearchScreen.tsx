@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
-import SpeechRecognition from "components/SpeechRecognition";
 import MedicineForm from "../components/MedicineForm";
 
 const SearchScreen = () => {

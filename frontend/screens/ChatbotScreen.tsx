@@ -1,6 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Text, TouchableOpacity, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 const quickQuestions = [
   "¿Cómo añado un nuevo medicamento?",
@@ -19,6 +21,17 @@ const ChatScreen: React.FC = () => {
   const [input, setInput] = useState("");
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null); // ✅ Referencia para el ScrollView
+
+  const { text, isListening, startListening, stopListening, hasRecognitionSupport } =
+    useSpeechRecognition();
+
+  // Cuando el reconocimiento de voz detecta texto, lo usamos como input
+  useEffect(() => {
+    if (text) {
+      setInput(text);
+      sendMessage(text); // Envía el mensaje automáticamente al terminar de hablar
+    }
+  }, [text]);
 
   // Simulación de enviar mensaje
   const sendMessage = (message: string) => {
@@ -87,7 +100,7 @@ const ChatScreen: React.FC = () => {
         ))}
       </ScrollView>
 
-      {/* ✅ Input para escribir mensajes */}
+      {/* ✅ Input + Botón de Enviar + Micrófono */}
       <View className="px-4 pb-3" style={{ paddingBottom: insets.bottom + 10 }}>
         <View
           className="flex-row items-center bg-white p-2 shadow-md"
@@ -100,6 +113,7 @@ const ChatScreen: React.FC = () => {
             shadowRadius: 4, // Sombra en iOS
           }}
         >
+          {/* Input de texto */}
           <TextInput
             className="flex-1 bg-gray-100 p-3 text-black"
             style={{
@@ -111,6 +125,15 @@ const ChatScreen: React.FC = () => {
             onSubmitEditing={() => sendMessage(input)}
             returnKeyType="send"
           />
+
+          {/* Botón de micrófono (si el dispositivo lo soporta) */}
+          {hasRecognitionSupport && (
+            <TouchableOpacity onPress={isListening ? stopListening : startListening} className="ml-2">
+              <Ionicons name={isListening ? "mic-off" : "mic"} size={24} color="gray" />
+            </TouchableOpacity>
+          )}
+
+          {/* Botón de enviar */}
           <TouchableOpacity
             className="bg-blue-500 px-4 py-3 ml-2"
             style={{
