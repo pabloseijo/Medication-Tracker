@@ -31,7 +31,7 @@ export default function Navbar() {
             } else if (route.name === "BarcodeScanner") {
               iconName = "barcode-scan";
             } else if (route.name === "Chatbot") {
-              iconName = "chatbot";
+              iconName = "chat";
             }
 
             return <Icon name={iconName} type="material-community" color={color} size={size} />;
