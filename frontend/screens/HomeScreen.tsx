@@ -19,15 +19,15 @@ import { Swipeable } from "react-native-gesture-handler";
 
 // Interfaz de un tratamiento
 interface Treatment {
-  name: string;            
-  dose: number;            
+  name: string;
+  dose: number;
   meals: {
     desayuno: boolean;
     comida: boolean;
     cena: boolean;
   };
-  startDate: Date;         
-  duration: number;        
+  startDate: Date;
+  duration: number;
 }
 
 type MealType = "desayuno" | "comida" | "cena";
@@ -243,36 +243,21 @@ export default function HomeScreen() {
   // Extraemos fecha en formato YYYY-MM-DD para recargar datos tras guardar
   const year = selectedDate.getFullYear();
   const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
-  const day = (selectedDate.getDate()-1).toString().padStart(2, "0");
+  const day = (selectedDate.getDate() - 1).toString().padStart(2, "0");
   const dateString = `${year}-${month}-${day}`;
 
   // POST: guarda un medicamento en la API y recarga la lista
   const saveMedicine = async (medData: any) => {
     try {
-      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(medData, null, 2));
-
-      const response = await fetch("http://localhost:8000/sporadic", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(medData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error en la API: ${response.status} - ${errorText}`);
-      }
-
       console.log("✅ Medicamento guardado correctamente.");
 
-      // Simulamos un dayPress con la fecha seleccionada
-      loadItemsForDay({
-        dateString,
-        year: Number(year),
-        month: Number(month),
-        day: Number(day),
-        timestamp: new Date(dateString).getTime(),
+      // 2. Simular un "day press" con selectedDate
+      await loadItemsForDay({
+        dateString: selectedDate.toISOString().split("T")[0],
+        year: selectedDate.getFullYear(),
+        month: selectedDate.getMonth() + 1,
+        day: selectedDate.getDate(),
+        timestamp: selectedDate.getTime(),
       });
     } catch (error) {
       console.error("❌ Error al guardar el medicamento:", error);
