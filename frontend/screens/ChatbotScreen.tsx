@@ -1,6 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Text, TouchableOpacity, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 const quickQuestions = [
   "¿Cómo añado un nuevo medicamento?",
@@ -16,40 +18,47 @@ interface Message {
 
 const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(""); 
   const insets = useSafeAreaInsets();
-  const scrollViewRef = useRef<ScrollView>(null); // ✅ Referencia para el ScrollView
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  // Simulación de enviar mensaje
-  const sendMessage = (message: string) => {
-    if (!message.trim()) return;
+  // Hook de reconocimiento de voz
+  const { text, isListening, startListening, stopListening, hasRecognitionSupport } =
+    useSpeechRecognition();
 
-    setMessages((prevMessages) => [...prevMessages, { text: message, sender: "user" }]);
+  // 🔹 Cuando el reconocimiento de voz detecta texto, solo actualiza el input
+  useEffect(() => {
+    if (text) {
+      setInput(text); // 📝 Solo escribe el texto en el input, no lo envía
+    }
+  }, [text]);
 
-    // Desplazar al final después de que React actualice el estado
+  // Función para enviar mensaje
+  const sendMessage = () => {
+    if (!input.trim()) return;
+
+    setMessages((prevMessages) => [...prevMessages, { text: input, sender: "user" }]);
+
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
 
-    // Simulación de respuesta del bot
     setTimeout(() => {
       setMessages((prevMessages) => [
         ...prevMessages,
         { text: "Esto es una respuesta automática del bot.", sender: "bot" },
       ]);
-
-      // Desplazar de nuevo al recibir respuesta
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }, 1000);
 
-    setInput(""); // Limpiar input después de enviar
+    setInput(""); // 🔹 Limpiar el input después de enviar
   };
 
   return (
     <View className="flex-1 bg-gray-100 p-4">
-      {/* ✅ Preguntas rápidas (SOLO SI NO HAY MENSAJES) */}
+      {/* ✅ Preguntas rápidas */}
       {messages.length === 0 && (
         <View className="mb-4">
           <Text className="text-lg font-semibold mb-2">Preguntas Rápidas</Text>
@@ -58,7 +67,7 @@ const ChatScreen: React.FC = () => {
               <TouchableOpacity
                 key={index}
                 className="bg-blue-500 p-2 rounded-lg m-1"
-                onPress={() => sendMessage(question)}
+                onPress={() => setInput(question)} // 🔹 Llena el input en lugar de enviar
               >
                 <Text className="text-white text-sm">{question}</Text>
               </TouchableOpacity>
@@ -67,11 +76,11 @@ const ChatScreen: React.FC = () => {
         </View>
       )}
 
-      {/* ✅ Área de mensajes con desplazamiento automático */}
+      {/* ✅ Área de mensajes */}
       <ScrollView
-        ref={scrollViewRef} // 🔹 Asignamos la referencia
+        ref={scrollViewRef}
         className="flex-1 mb-4"
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })} // 🔹 Auto-scroll al actualizar
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
         {messages.map((msg, index) => (
           <View
@@ -80,43 +89,49 @@ const ChatScreen: React.FC = () => {
               msg.sender === "user" ? "bg-blue-500 self-end" : "bg-gray-300 self-start"
             }`}
           >
-            <Text className={`${msg.sender === "user" ? "text-white" : "text-black"}`}>
+            <Text className={msg.sender === "user" ? "text-white" : "text-black"}>
               {msg.text}
             </Text>
           </View>
         ))}
       </ScrollView>
 
-      {/* ✅ Input para escribir mensajes */}
+      {/* ✅ Input + Botón de Enviar + Micrófono */}
       <View className="px-4 pb-3" style={{ paddingBottom: insets.bottom + 10 }}>
         <View
           className="flex-row items-center bg-white p-2 shadow-md"
           style={{
-            borderRadius: 30, // Hace que el contenedor sea redondeado
-            elevation: 3, // Sombra en Android
+            borderRadius: 30,
+            elevation: 3,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
-            shadowRadius: 4, // Sombra en iOS
+            shadowRadius: 4,
           }}
         >
+          {/* Input de texto */}
           <TextInput
             className="flex-1 bg-gray-100 p-3 text-black"
-            style={{
-              borderRadius: 25, // Bordes redondeados para el input
-            }}
+            style={{ borderRadius: 25 }}
             placeholder="Escribe un mensaje..."
             value={input}
             onChangeText={setInput}
-            onSubmitEditing={() => sendMessage(input)}
+            onSubmitEditing={sendMessage} // 🔹 Presionar "Enter" envía el mensaje
             returnKeyType="send"
           />
+
+          {/* Botón de micrófono (si el dispositivo lo soporta) */}
+          {hasRecognitionSupport && (
+            <TouchableOpacity onPress={isListening ? stopListening : startListening} className="ml-2">
+              <Ionicons name={isListening ? "mic-off" : "mic"} size={24} color="gray" />
+            </TouchableOpacity>
+          )}
+
+          {/* Botón de enviar */}
           <TouchableOpacity
             className="bg-blue-500 px-4 py-3 ml-2"
-            style={{
-              borderRadius: 20, // Botón redondeado
-            }}
-            onPress={() => sendMessage(input)}
+            style={{ borderRadius: 20 }}
+            onPress={sendMessage} // 🔹 Ahora el mensaje solo se envía al presionar
           >
             <Text className="text-white font-bold">Enviar</Text>
           </TouchableOpacity>
