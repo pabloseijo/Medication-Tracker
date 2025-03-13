@@ -92,11 +92,6 @@ export default function BarcodeScannerScreen() {
     setIsModalOpen(false); // Cerrar el modal después de guardar
   };
 
-  const handleSave = (data) => {
-    console.log("✅ Medicamento guardado:", data);
-    setIsModalOpen(false); // Cerrar el modal después de guardar
-  };
-
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100">
       {/* 🔹 Escáner */}
