@@ -6,6 +6,7 @@ from app.routes.meds import meds_router
 from app.routes.user import user_router
 from app.services.typesense import create_meds_collection
 from app.utils.mock import create_mocks
+from app.routes.messages import message_router
 
 
 @asynccontextmanager
@@ -50,6 +51,7 @@ app.add_middleware(
 
 app.include_router(meds_router)
 app.include_router(user_router)
+app.include_router(message_router)
 
 
 # Endpoint raíz

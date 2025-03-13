@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
+const API_URL = "http://localhost:8000/messages"; // Reemplaza con la URL de tu API
+
 const quickQuestions = [
   "¿Cómo añado un nuevo medicamento?",
   "¿Cómo configuro recordatorios para mis tomas?",
@@ -34,7 +36,7 @@ const ChatScreen: React.FC = () => {
   }, [text]);
 
   // Función para enviar mensaje
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
     setMessages((prevMessages) => [...prevMessages, { text: input, sender: "user" }]);
@@ -43,15 +45,39 @@ const ChatScreen: React.FC = () => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
 
-    setTimeout(() => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: "Esto es una respuesta automática del bot.", sender: "bot" },
-      ]);
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }, 1000);
+    try {
+      //  Enviar mensaje a la API
+      const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: input, author: "user" }),
+      });
+
+      if (!response.ok) {
+          throw new Error("Error al obtener la respuesta del chatbot");
+      }
+
+      // Obtener la respuesta del chatbot
+      const data = await response.json();
+      const botResponse: { text: string; sender: "user" | "bot" } = {
+          text: data.text,
+          sender: "bot",
+      };
+
+      // Agregar la respuesta del chatbot al estado
+      setMessages((prevMessages) => [...prevMessages, botResponse]);
+
+      // Si se produce un error ponemos un mensaje de error en el chat
+    } catch (error) {
+      console.error("Error al comunicarse con la API:", error);
+      const botErrorResponse: { text: string; sender: "user" | "bot" } = {
+          text: "Lo siento, no pude procesar tu solicitud.",
+          sender: "bot",
+      };
+      setMessages((prevMessages) => [...prevMessages, botErrorResponse]);
+  }
 
     setInput(""); // 🔹 Limpiar el input después de enviar
   };
@@ -67,7 +93,7 @@ const ChatScreen: React.FC = () => {
               <TouchableOpacity
                 key={index}
                 className="bg-blue-500 p-2 rounded-lg m-1"
-                onPress={() => setInput(question)} // 🔹 Llena el input en lugar de enviar
+                onPress={() => {setInput(question); console.log("Input: ", question)}} // 🔹 Llena el input en lugar de enviar
               >
                 <Text className="text-white text-sm">{question}</Text>
               </TouchableOpacity>

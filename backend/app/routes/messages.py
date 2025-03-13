@@ -20,7 +20,7 @@ async def process_message(
     Envía un mensaje al chatbot y devuelve la respuesta.
     """
     try:
-        mock_user = await db.users.find_one({"email": "mock@example.com"})
+        mock_user = await db.users.find_one({"email": "javier@gmail.com"})
         if not mock_user:
             return None
         # Se añade el mensaje a la base de datos
