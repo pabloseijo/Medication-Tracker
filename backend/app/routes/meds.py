@@ -1,15 +1,18 @@
+from datetime import datetime
+from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from motor.motor_asyncio import AsyncIOMotorCollection
-from app.crud.meds import add_sporadic_medication, add_treatment, get_all_sporadic_medications, get_all_treatments
+from app.crud.meds import (
+    add_sporadic_medication,
+    add_treatment,
+)
 from app.database import get_database
-from app.schemas.meds import Medication 
+from app.schemas.meds import Medication
 from app.services.cima import (
     obtener_medicamento_por_codigo,
-    obtener_medicamento_por_nombre,
     obtener_medicamentos_por_nombre,
 )
 from app.services.typesense import search_medications
-from fastapi.encoders import jsonable_encoder
 
 meds_router = APIRouter()
 
@@ -31,8 +34,9 @@ def search_meds(q: str = Query(..., description="Nombre del medicamento")):
 @meds_router.get("/med_name")
 def autocomplete_meds(name: str):
     # med = obtener_medicamento_por_nombre(name)
-    med = obtener_medicamentos_por_nombre(name) # Array de medicamentos
+    med = obtener_medicamentos_por_nombre(name)  # Array de medicamentos
     return med
+
 
 @meds_router.post("/sporadic", status_code=status.HTTP_201_CREATED)
 async def create_sporadic_medication(
@@ -77,52 +81,40 @@ async def create_treatment(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
-@meds_router.delete("/treatments/delete", status_code=status.HTTP_200_OK)
-async def delete_treatment(
-    treatment: Medication,
-    db: AsyncIOMotorCollection = Depends(get_database),
-):
-    try:
-        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
-        if not mock_user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        treatment.user_id = mock_user["_id"]
-        result = await db.treatments.delete_one(treatment.model_dump())
-
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="No se ha podido eliminar el tratamiento")
-
-        return {"message": "Tratamiento eliminado exitosamente"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
-
-
-@meds_router.delete("/sporadic/delete", status_code=status.HTTP_200_OK)
+@meds_router.delete("/sporadic", status_code=status.HTTP_200_OK)
 async def delete_sporadic_medication(
     medication: Medication,
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
-        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
+        # Convertir el modelo Pydantic a un diccionario
+        medication_data = medication.model_dump()
+        mock_user = await db.users.find_one({"email": "mock@example.com"})
         if not mock_user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            raise ValueError("Usuario no encontrado")
+        # Construir el filtro para la eliminación
+        filter_query = {
+            "user_id": ObjectId(mock_user["_id"]),  # Coincidir con el user_id
+            "name": medication_data["name"],  # Coincidir con el nombre
+            "cantidad": medication_data["cantidad"],  # Coincidir con la cantidad
+            "moments": medication_data["moments"],  # Coincidir con los momentos
+            "duration_days": medication_data["duration_days"],
+        }
 
-        medication.user_id = mock_user["_id"]
-        result = await db.sporadic_medication.delete_one(medication.model_dump())
+        # Eliminar el documento
+        result = await db.sporadic_medication.delete_one(filter_query)
 
         if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="No se ha podido eliminar la medicación")
+            raise ValueError("No se ha podido eliminar la medicación")
 
         return {"message": "Medicación esporádica eliminada exitosamente"}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
-     
-        
+
+
 @meds_router.get("/treatments")
 async def get_treatments(
     db: AsyncIOMotorCollection = Depends(get_database),
@@ -132,13 +124,14 @@ async def get_treatments(
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     treatments = await db.treatments.find({"user_id": mock_user["_id"]}).to_list(None)
-    
+
     # Convertir ObjectId a str en cada tratamiento
     for treatment in treatments:
         treatment["_id"] = str(treatment["_id"])
         treatment["user_id"] = str(treatment["user_id"])
 
-    return treatments  
+    return treatments
+
 
 @meds_router.get("/sporadic", status_code=status.HTTP_200_OK)
 async def read_sporadic_medications(
@@ -156,7 +149,9 @@ async def read_sporadic_medications(
 
         # Obtener las medicaciones esporádicas del usuario mock
         medications = []
-        async for medication in db.sporadic_medication.find({"user_id": mock_user["_id"]}):
+        async for medication in db.sporadic_medication.find(
+            {"user_id": mock_user["_id"]}
+        ):
             # Convertir ObjectId a str
             medication["_id"] = str(medication["_id"])
             medication["user_id"] = str(medication["user_id"])
