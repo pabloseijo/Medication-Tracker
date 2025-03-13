@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -16,6 +16,8 @@ import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
 import MedicineForm from "../components/MedicineForm";
 import { Swipeable } from "react-native-gesture-handler";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 // Interfaz de un tratamiento
 interface Treatment {
@@ -198,7 +200,7 @@ export default function HomeScreen() {
   // Renderiza la lista de medicamentos con swipe para borrar
   const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
     return Object.keys(meds).map((med) => (
-      <View key={med} className="relative mb-2">
+      <View key={med} className="relative mb-2 bg-white">
         <View className="absolute inset-0 h-full bg-red-500 flex justify-center items-end pr-5 rounded-lg">
           <RNText className="text-white font-bold text-lg">Borrar</RNText>
         </View>
@@ -259,18 +261,16 @@ export default function HomeScreen() {
 
   // Renderiza la vista vacía (cuando no hay datos en el día)
   const renderEmptyData = () => (
-    <ScrollView className="flex-1">
-      <Card className="mb-4 p-4 shadow-lg rounded-lg">
-        <StatsOverview
-          progress={progressValue}
-          medsTaken={takenMeds}
-          medsTotal={totalMeds}
-          topMeds={topMedsComputed}
-        />
-      </Card>
+    <ScrollView className="flex-1 bg-white">
+      <StatsOverview
+        progress={progressValue}
+        medsTaken={takenMeds}
+        medsTotal={totalMeds}
+        topMeds={topMedsComputed}
+      />
       {["desayuno", "comida", "cena"].map((meal) => (
-        <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
-          <View className="mb-4">
+        <Card key={meal} className="mb-4 p-4 rounded-lg">
+          <View className="mb-4 bg-white">
             <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
             {renderMedicineList(meal, medsTaken[meal as MealType])}
             <Button
@@ -286,10 +286,32 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = (today.getMonth() + 1).toString().padStart(2, "0");
+      const day = today.getDate().toString().padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+  
+      loadItemsForDay({ dateString, year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate(), timestamp: today.getTime() });
+    }, [])
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
-        <Text className="text-center my-4 text-2xl font-bold">Agenda</Text>
+      <Text 
+          style={{ 
+              fontSize: 32, // 🔹 Tamaño del texto más grande (equivalente a text-3xl o text-4xl en Tailwind)
+              fontWeight: "bold", // 🔹 Negrita aplicada correctamente
+              textAlign: "center", // 🔹 Centrar el texto
+              marginVertical: 16 // 🔹 Equivalente a my-4 en Tailwind
+          }}
+      >
+          Agenda
+      </Text>
+
         <Agenda
           showOnlySelectedDayItems={true}
           onDayPress={loadItemsForDay}

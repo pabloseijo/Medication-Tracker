@@ -14,6 +14,7 @@ requests = "*"
 pydantic = {extras = ["email"], version = "*"}
 pyjwt = "*"
 typesense = "*"
+openai = "*"
 
 [dev-packages]
 

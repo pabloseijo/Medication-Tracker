@@ -1,5 +1,14 @@
+from typing import List
 from pydantic import BaseModel, EmailStr
 
+class Patient(BaseModel):
+    name: str
+    surname: str
+    age: float
+    height: float
+    weight: float
+    diabetes: bool
+    hypertension: bool
 
 class UserCreate(BaseModel):
     name: str
@@ -11,11 +20,14 @@ class UserCreate(BaseModel):
     weight: float
     diabetes: bool
     hypertension: bool
+    isMedic: bool
+    patients: List[Patient] = []  # Lista de IDs de pacientes (vacía por defecto)
 
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class UserUpdate(BaseModel):
     name: str
@@ -25,6 +37,9 @@ class UserUpdate(BaseModel):
     weight: float
     diabetes: bool
     hypertension: bool
+    isMedic: bool
+    patients: List[Patient] = []  # Lista de IDs de pacientes (vacía por defecto)
+    
 
 class Token(BaseModel):
     access_token: str

@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 
 from app.crud.user import create_user, get_user_data, login_user, update_user
 from app.database import get_database
+from app.utils.config import CURRENT_USER_EMAIL
 from app.schemas.user import Token, UserCreate, UserLogin, UserUpdate
 from app.utils.security import create_access_token
 
@@ -35,7 +36,9 @@ async def login(user: UserLogin, db: AsyncIOMotorCollection = Depends(get_databa
 @user_router.get("/profile", response_model=UserUpdate, status_code=status.HTTP_200_OK)
 async def get_profile(db: AsyncIOMotorCollection = Depends(get_database)):
     try:
-        return await get_user_data(db.users, "mock@example.com")
+        result = await get_user_data(db.users, CURRENT_USER_EMAIL)
+        print(result)
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -43,6 +46,6 @@ async def get_profile(db: AsyncIOMotorCollection = Depends(get_database)):
 @user_router.put("/profile", status_code=status.HTTP_200_OK)
 async def update(user: UserUpdate, db: AsyncIOMotorCollection = Depends(get_database)):
     try:
-        await update_user(db.users, user, "mock@example.com")
+        await update_user(db.users, user, CURRENT_USER_EMAIL)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

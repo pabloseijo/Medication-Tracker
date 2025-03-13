@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
@@ -10,6 +9,7 @@ const SearchScreen = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [medData, setMedData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false); 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 🟢 Llamada a la API para obtener sugerencias (autocompletado)
@@ -29,15 +29,18 @@ const SearchScreen = () => {
   };
 
   // 🔎 Llamada a la API para obtener información del medicamento
-  const fetchMedData = async () => {
-    if (!query.trim()) return;
+  const fetchMedData = async (searchQuery?: string) => {
+    const searchTerm = searchQuery || query; // Usa el argumento si está disponible, sino usa `query`
+    
+    if (!searchTerm.trim()) return;
 
     setLoading(true);
     setMedData(null);
     setSuggestions([]); // Ocultar sugerencias después de buscar
+    setSearched(false); // Resetear el estado antes de buscar
 
     try {
-      const response = await fetch(`http://localhost:8000/med_name?name=${query}`);
+      const response = await fetch(`http://localhost:8000/med_name?name=${searchTerm}`);
       const data = await response.json();
       setMedData(data);
     } catch (error) {
@@ -45,11 +48,13 @@ const SearchScreen = () => {
     }
 
     setLoading(false);
+    setSearched(true); // Marcar que la búsqueda ya se realizó
   };
 
   const handleSave = (data) => {
     console.log("✅ Medicamento guardado:", data);
     setIsModalOpen(false); // Cerrar el modal después de guardar
+    setSearched(true); // Marcar que la búsqueda ya se realizó
   };
 
   return (
@@ -59,11 +64,14 @@ const SearchScreen = () => {
         <SearchBar 
           className="w-full bg-white p-3 rounded-lg shadow-md border-gray-300"
           query={query} 
-          setQuery={(text) => { setQuery(text); fetchSuggestions(text); }} 
+          setQuery={(text) => { 
+            setQuery(text); 
+            setSearched(false);
+            fetchSuggestions(text); 
+          }} 
           onSearch={fetchMedData} 
         />
       </View>
-
 
       {/* Lista de sugerencias */}
       {suggestions.length > 0 && (
@@ -71,7 +79,7 @@ const SearchScreen = () => {
           <SuggestionsList 
           className="bg-white p-3 rounded-lg shadow-md border border-gray-200"
           suggestions={suggestions} 
-          onSelect={(name) => setQuery(name)} />
+          onSelect={(name) => {setQuery(name); fetchMedData(name)}} />
         </View>
       )}
 
@@ -83,7 +91,7 @@ const SearchScreen = () => {
         {medData && medData.map((medicamento, index) => (
           <View 
             key={index} 
-            className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300  items-center"
+            className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300 items-center"
           >
             <Text className="text-xl font-bold text-blue-900">💊 {medicamento.nombre}</Text>
             <View className="flex-row">
@@ -114,19 +122,19 @@ const SearchScreen = () => {
           </View>
         ))}
 
-              {/* 🔹 Modal de `MedicineForm` */}
-      {isModalOpen && (
-        <MedicineForm 
-          isVisible={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          onSave={handleSave}
-          selectedMeal={"desayuno"}
-          selectedDate={new Date()} // Pasa la fecha actual
-        />
-      )}
+        {/* 🔹 Modal de `MedicineForm` */}
+        {isModalOpen && ( 
+          <MedicineForm 
+            isVisible={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            onSave={handleSave}
+            selectedMeal={"desayuno"}
+            selectedDate={new Date()} // Pasa la fecha actual
+          />
+        )}
 
         {/* Mensaje de error si no se encuentra el medicamento */}
-        {!loading && medData === null && query !== "" && (
+        {!loading && searched && (medData === null || medData.length === 0 ) && query !== "" && (
           <Text className="mt-5 text-lg text-red-600 text-center font-semibold">
             ⚠️ Medicamento no encontrado
           </Text>
