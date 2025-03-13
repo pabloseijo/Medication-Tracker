@@ -31,6 +31,7 @@ async def login_user(
     if user and verify_password(user.password, existing_user["hashed_password"]):
         return str(existing_user["_id"])
 
+
 async def update_user(
     collection: AsyncIOMotorCollection, user: UserUpdate, email: str
 ) -> Optional[str]:
@@ -61,4 +62,6 @@ async def get_user_data(
         weight=existing_user.get("weight"),
         diabetes=existing_user.get("diabetes"),
         hypertension=existing_user.get("hypertension"),
+        isMedic=existing_user.get("isMedic"),
+        patients=existing_user.get("patients"),
     )
