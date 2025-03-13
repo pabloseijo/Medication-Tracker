@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "use-barcode-scanner": "^0.1.1"
+  }
+}

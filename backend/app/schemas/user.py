@@ -17,6 +17,14 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class UserUpdate(BaseModel):
+    name: str
+    surname: str
+    age: float
+    height: float
+    weight: float
+    diabetes: bool
+    hypertension: bool
 
 class Token(BaseModel):
     access_token: str

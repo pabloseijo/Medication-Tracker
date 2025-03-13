@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import start_client, close_client
+from app.crud.user import create_user
+from app.database import get_database, start_client, close_client
 from contextlib import asynccontextmanager
 from app.routes.meds import meds_router
 from app.routes.user import user_router
+from app.schemas.user import UserCreate
 from app.services.typesense import create_meds_collection
 
 
@@ -19,6 +21,25 @@ async def lifespan(app: FastAPI):
     await start_client()
     create_meds_collection()
     print("Conexión a MongoDB establecida.")
+
+    # Crear usuario mock
+    db = await get_database()
+    users_collection = db.users
+    mock_user = await users_collection.find_one({"email": "mock@example.com"})
+    if not mock_user:
+        mock_user_data = UserCreate(
+            name="Mock",
+            surname="User",
+            password="mockpassword",
+            email="mock@example.com",
+            age=30,
+            height=175,
+            weight=70.0,
+            diabetes=False,
+            hypertension=False,
+        )
+        await create_user(users_collection, mock_user_data)
+        print("Usuario mock creado.")
 
     yield  # Permite que la aplicación se ejecute
 

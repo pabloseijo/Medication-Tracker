@@ -1,124 +1,295 @@
 import React, { useState } from "react";
-import { ScrollView, View, SafeAreaView } from "react-native";
-import { Text, Card, Button } from "@ui-kitten/components";
-import { Agenda, DateData, AgendaEntry, AgendaSchedule } from "react-native-calendars";
+import {
+  ScrollView,
+  View,
+  SafeAreaView,
+  Animated,
+  Text as RNText,
+} from "react-native";
+import {
+  Text,
+  Card,
+  Button,
+} from "@ui-kitten/components";
+import { Agenda, DateData } from "react-native-calendars";
 import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
+import MedicineForm from "../components/MedicineForm";
+import { Swipeable } from "react-native-gesture-handler";
 
-// 🔹 Definimos correctamente el tipo de los eventos
+// Interfaz de un tratamiento
+interface Treatment {
+  name: string;
+  dose: number;
+  meals: {
+    desayuno: boolean;
+    comida: boolean;
+    cena: boolean;
+  };
+  startDate: Date;
+  duration: number;
+}
 
+type MealType = "desayuno" | "comida" | "cena";
+
+// Estructura de medsTaken para la UI
 type MedicineList = {
-  desayuno: { [key: string]: boolean };
-  comida: { [key: string]: boolean };
-  cena: { [key: string]: boolean };
+  [key in MealType]: { [key: string]: boolean };
 };
 
-export default function MyAgenda() {
+// Cuenta el total de medicamentos en la estructura MedicineList
+function countAllMeds(meds: MedicineList): number {
+  let total = 0;
+  for (const meal of Object.keys(meds) as MealType[]) {
+    total += Object.keys(meds[meal]).length;
+  }
+  return total;
+}
+
+// Cuenta cuántos medicamentos han sido tomados (valor === true)
+function countTakenMeds(meds: MedicineList): number {
+  let total = 0;
+  for (const meal of Object.keys(meds) as MealType[]) {
+    total += Object.values(meds[meal]).filter(val => val === true).length;
+  }
+  return total;
+}
+
+// Calcula los "top meds" (los más tomados)
+function computeTopMeds(meds: MedicineList): { name: string; taken: number }[] {
+  const counts: { [name: string]: number } = {};
+  for (const meal of Object.keys(meds) as MealType[]) {
+    for (const med in meds[meal]) {
+      if (meds[meal][med] === true) {
+        counts[med] = (counts[med] || 0) + 1;
+      }
+    }
+  }
+  return Object.entries(counts)
+    .map(([name, taken]) => ({ name, taken }))
+    .sort((a, b) => b.taken - a.taken);
+}
+
+export default function HomeScreen() {
+  // Estado para almacenar los tratamientos (GET a /sporadic)
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
+
+  // Día seleccionado en la Agenda
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Control del modal y la comida seleccionada
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<string>("");
+
+  // Estado de la UI (medicinas activas en desayuno, comida, cena)
   const [medsTaken, setMedsTaken] = useState<MedicineList>({
-    desayuno: { ibuprofeno: false, omeprazol: false },
-    comida: { paracetamol: false },
-    cena: { vitaminaC: false },
+    desayuno: {},
+    comida: {},
+    cena: {},
   });
 
-  // 🔹 Cargar eventos dinámicamente cuando se seleccione un día
-  const loadItemsForDay = (day: DateData) => {
-    console.log("Cargando eventos para el día:", day.dateString);
+  // Estadísticas para StatsOverview
+  const totalMeds = countAllMeds(medsTaken);
+  const takenMeds = countTakenMeds(medsTaken);
+  const progressValue = totalMeds > 0 ? takenMeds / totalMeds : 0;
+  const topMedsComputed = computeTopMeds(medsTaken);
 
-    // Actualizar los medicamentos del día seleccionado
-    updateMedsForDay(day.dateString);
+  // Construye un MedicineList a partir de un array de Treatment
+  const buildMedicineList = (treatments: Treatment[]): MedicineList => {
+    const list: MedicineList = { desayuno: {}, comida: {}, cena: {} };
+    treatments.forEach((treatment) => {
+      if (treatment.meals.desayuno) {
+        list.desayuno[treatment.name] = false;
+      }
+      if (treatment.meals.comida) {
+        list.comida[treatment.name] = false;
+      }
+      if (treatment.meals.cena) {
+        list.cena[treatment.name] = false;
+      }
+    });
+    return list;
   };
 
-  // Función para actualizar los medicamentos según el día seleccionado
-  const updateMedsForDay = (selectedDay: string) => {
-    if (selectedDay === "2025-03-10") {
-      setMedsTaken({
-        desayuno: { ibuprofeno: false, omeprazol: false },
-        comida: { paracetamol: false },
-        cena: { vitaminaC: false },
-      });
-    } else if (selectedDay === "2025-03-11") {
-      setMedsTaken({
-        desayuno: { ibuprofeno: true, omeprazol: false },
-        comida: { paracetamol: false },
-        cena: { vitaminaC: true },
-      });
+  // Llamada GET para obtener los medicamentos y actualizar la UI
+  const loadItemsForDay = async (day: DateData) => {
+    console.log("Cargando eventos para el día:", day.dateString);
+    const [year, month, dayNum] = day.dateString.split("-").map(Number);
+    const localDate = new Date(year, month - 1, dayNum + 1);
+    setSelectedDate(localDate);
+
+    try {
+      const response = await fetch("http://localhost:8000/sporadic");
+      if (response.ok) {
+        const data = await response.json();
+        // Mapeamos cada item a un objeto Treatment
+        const mappedTreatments: Treatment[] = data.map((item: any) => ({
+          name: item.name,
+          dose: item.cantidad,
+          meals: {
+            desayuno: item.moments[0],
+            comida: item.moments[1],
+            cena: item.moments[2],
+          },
+          startDate: new Date(item.inicio),
+          duration: item.duration_days,
+        }));
+        setTreatments(mappedTreatments);
+
+        // Filtramos los que están activos en la fecha seleccionada
+        const activeTreatments: Treatment[] = mappedTreatments.filter((t) => {
+          const treatmentEnd = new Date(t.startDate);
+          treatmentEnd.setDate(treatmentEnd.getDate() + t.duration);
+          return localDate >= t.startDate && localDate <= treatmentEnd;
+        });
+
+        // Construimos la estructura para medsTaken
+        const medicineList = buildMedicineList(activeTreatments);
+        setMedsTaken(medicineList);
+
+        console.log("Formato final:", medicineList);
+      } else {
+        console.error("Error en GET sporadic:", response.status);
+      }
+    } catch (error) {
+      console.error("Error al obtener sporadic:", error);
     }
   };
 
-  // 🔹 Mensaje cuando no hay eventos
-  const renderEmptyData = () => (
-    <ScrollView className="flex-1">
-    {(
-      <>
-        <Card className="mb-4 p-4">
-          <StatsOverview progress={0.7} medsTaken={7} medsTotal={10} />
-        </Card>
+  // DELETE: elimina un medicamento de la API y de la UI local
+  const removeMedicine = async (meal: MealType, med: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/sporadic/delete?name=${encodeURIComponent(med)}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-        {/* 🔹 Sección de Medicamentos */}
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Desayuno</Text>
-            <MedicineCard
-              name="Ibuprofeno"
-              taken={medsTaken.desayuno.ibuprofeno}
-              onPress={() => toggleMedicine("desayuno", "ibuprofeno")}
-            />
-            <MedicineCard
-              name="Omeprazol"
-              taken={medsTaken.desayuno.omeprazol}
-              onPress={() => toggleMedicine("desayuno", "omeprazol")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error al eliminar medicamento: ${response.status} - ${errorText}`);
+      }
 
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Comida</Text>
-            <MedicineCard
-              name="Paracetamol"
-              taken={medsTaken.comida.paracetamol}
-              onPress={() => toggleMedicine("comida", "paracetamol")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
+      console.log("✅ Medicamento eliminado correctamente en la API.");
 
-        <Card className="mb-4 p-4">
-          <View className="mb-4">
-            <Text className="text-xl font-semibold mb-2">Cena</Text>
-            <MedicineCard
-              name="Vitamina C"
-              taken={medsTaken.cena.vitaminaC}
-              onPress={() => toggleMedicine("cena", "vitaminaC")}
-            />
-            <Button appearance="outline" status="info">
-              + Añadir Medicamento
-            </Button>
-          </View>
-        </Card>
-      </>
-    )}
-  </ScrollView>
-  );
+      // Eliminamos localmente
+      setMedsTaken((prev) => {
+        const newMeds = { ...prev };
+        delete newMeds[meal][med];
+        return newMeds;
+      });
+    } catch (error) {
+      console.error("❌ Error al eliminar el medicamento:", error);
+    }
+  };
 
-  // Función para cambiar el estado de los medicamentos
-  const toggleMedicine = (meal: string, med: string) => {
+  // Alterna el estado (true/false) de un medicamento
+  const toggleMedicine = (meal: MealType, med: string) => {
     setMedsTaken((prev) => ({
       ...prev,
       [meal]: { ...prev[meal], [med]: !prev[meal][med] },
     }));
   };
 
+  // Renderiza la lista de medicamentos con swipe para borrar
+  const renderMedicineList = (meal: string, meds: { [key: string]: boolean }) => {
+    return Object.keys(meds).map((med) => (
+      <View key={med} className="relative mb-2">
+        <View className="absolute inset-0 h-full bg-red-500 flex justify-center items-end pr-5 rounded-lg">
+          <RNText className="text-white font-bold text-lg">Borrar</RNText>
+        </View>
+
+        <Swipeable
+          friction={2}
+          rightThreshold={60}
+          onSwipeableOpen={() => removeMedicine(meal as MealType, med)}
+          renderRightActions={(progress, dragX) => {
+            const translateX = dragX.interpolate({
+              inputRange: [-100, 0],
+              outputRange: [-100, 0],
+              extrapolate: "clamp",
+            });
+            return (
+              <Animated.View
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  transform: [{ translateX }],
+                }}
+              />
+            );
+          }}
+        >
+          <MedicineCard
+            name={med}
+            taken={meds[med]}
+            onPress={() => toggleMedicine(meal as MealType, med)}
+          />
+        </Swipeable>
+      </View>
+    ));
+  };
+
+  // Abre el modal para agregar un medicamento
+  const openAddMedicineModal = (meal: string) => {
+    setSelectedMeal(meal);
+    setModalVisible(true);
+  };
+
+  // Extraemos fecha en formato YYYY-MM-DD para recargar datos tras guardar
+  const year = selectedDate.getFullYear();
+  const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
+  const day = (selectedDate.getDate() - 1).toString().padStart(2, "0");
+  const dateString = `${year}-${month}-${day}`;
+
+  // POST: guarda un medicamento en la API y recarga la lista
+  const saveMedicine = async (medData: any) => {
+    try {
+      console.log("✅ Medicamento guardado correctamente.");
+
+
+    } catch (error) {
+      console.error("❌ Error al guardar el medicamento:", error);
+    }
+  };
+
+  // Renderiza la vista vacía (cuando no hay datos en el día)
+  const renderEmptyData = () => (
+    <ScrollView className="flex-1">
+      <Card className="mb-4 p-4 shadow-lg rounded-lg">
+        <StatsOverview
+          progress={progressValue}
+          medsTaken={takenMeds}
+          medsTotal={totalMeds}
+          topMeds={topMedsComputed}
+        />
+      </Card>
+      {["desayuno", "comida", "cena"].map((meal) => (
+        <Card key={meal} className="mb-4 p-4 shadow-lg rounded-lg">
+          <View className="mb-4">
+            <Text className="text-2xl font-semibold mb-2 capitalize">{meal}</Text>
+            {renderMedicineList(meal, medsTaken[meal as MealType])}
+            <Button
+              appearance="outline"
+              status="info"
+              onPress={() => openAddMedicineModal(meal)}
+            >
+              + Añadir Medicamento
+            </Button>
+          </View>
+        </Card>
+      ))}
+    </ScrollView>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 p-4">
-        {/* 🔹 Agenda */}
-        <Text className="text-8xl font-bold text-center my-4">Agenda</Text>
+        <Text className="text-center my-4 text-2xl font-bold">Agenda</Text>
         <Agenda
           showOnlySelectedDayItems={true}
           onDayPress={loadItemsForDay}
@@ -129,9 +300,17 @@ export default function MyAgenda() {
             agendaKnobColor: "green",
           }}
         />
-
-        
       </View>
+
+      {/* Formulario para agregar medicamentos */}
+      <MedicineForm
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={saveMedicine} // Llama a la función que hace POST
+        loadItemsForDay={loadItemsForDay} // Añadimos la función loadItemsForDay
+        selectedMeal={selectedMeal}
+        selectedDate={selectedDate}
+      />
     </SafeAreaView>
   );
 }

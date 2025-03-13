@@ -4,6 +4,7 @@ import * as eva from "@eva-design/eva";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import Navbar from "./components/Navbar";
 import "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
 
 import './global.css'
 
