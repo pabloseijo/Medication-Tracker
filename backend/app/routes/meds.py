@@ -78,20 +78,19 @@ async def create_treatment(
         )
 
 @meds_router.delete("/treatments/delete", status_code=status.HTTP_200_OK)
-async def delete_treatment(
-    treatment: Medication,
+async def delete_treatment_by_name(
+    name: str,
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
-        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
+        mock_user = await db.users.find_one({"email": "mock@example.com"})
         if not mock_user:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-        treatment.user_id = mock_user["_id"]
-        result = await db.treatments.delete_one(treatment.model_dump())
-
+        
+        result = await db.treatments.delete_one({"name": name, "user_id": mock_user["_id"]})
+        
         if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="No se ha podido eliminar el tratamiento")
+            raise HTTPException(status_code=404, detail="No se ha encontrado el tratamiento")
 
         return {"message": "Tratamiento eliminado exitosamente"}
     except Exception as e:
@@ -99,29 +98,26 @@ async def delete_treatment(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
-
 @meds_router.delete("/sporadic/delete", status_code=status.HTTP_200_OK)
-async def delete_sporadic_medication(
-    medication: Medication,
+async def delete_sporadic_medication_by_name(
+    name: str,
     db: AsyncIOMotorCollection = Depends(get_database),
 ):
     try:
-        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
+        mock_user = await db.users.find_one({"email": "mock@example.com"})
         if not mock_user:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-        medication.user_id = mock_user["_id"]
-        result = await db.sporadic_medication.delete_one(medication.model_dump())
-
+        
+        result = await db.sporadic_medication.delete_one({"name": name, "user_id": mock_user["_id"]})
+        
         if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="No se ha podido eliminar la medicación")
+            raise HTTPException(status_code=404, detail="No se ha encontrado la medicación esporádica")
 
         return {"message": "Medicación esporádica eliminada exitosamente"}
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        status_code=404, detail="Usuario no encontrado"
         )
-     
         
 @meds_router.get("/treatments")
 async def get_treatments(
