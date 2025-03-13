@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -16,6 +16,8 @@ import MedicineCard from "../components/MedicineCard";
 import StatsOverview from "components/StatsOverview";
 import MedicineForm from "../components/MedicineForm";
 import { Swipeable } from "react-native-gesture-handler";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 // Interfaz de un tratamiento
 interface Treatment {
@@ -284,6 +286,18 @@ export default function HomeScreen() {
         </Card>
       ))}
     </ScrollView>
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = (today.getMonth() + 1).toString().padStart(2, "0");
+      const day = today.getDate().toString().padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+  
+      loadItemsForDay({ dateString, year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate(), timestamp: today.getTime() });
+    }, [])
   );
 
   return (
