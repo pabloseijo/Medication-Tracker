@@ -1,16 +1,29 @@
-import { Ionicons } from '@expo/vector-icons';
-import { View, TextInput, TouchableOpacity, Text, Keyboard } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { View, TextInput, TouchableOpacity, Text, Keyboard } from "react-native";
+import { useEffect } from "react";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 interface SearchBarProps {
   query: string;
   setQuery: (text: string) => void;
-  onSearch: () => void; //función para ejecutar la búsqueda
+  onSearch: () => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, onSearch }) => {
+  const { text, isListening, startListening, stopListening, hasRecognitionSupport } =
+    useSpeechRecognition();
+
+  // Cuando se detecta un nuevo texto por voz, se actualiza el query
+  useEffect(() => {
+    if (text) {
+      setQuery(text);
+      Keyboard.dismiss();
+    }
+  }, [text]);
+
   return (
     <View className="h-12 w-[100%] flex-row items-center rounded-xl bg-gray-200 px-4 py-3">
-      <Ionicons name="search" size={20} color="gray" className="mr-2" />
+      <Ionicons name="search" size={20} color="gray" className="mr-2" onPress={onSearch}/>
       <TextInput
         className="flex-1 border-0 text-gray-700 outline-none focus:border-0 focus:outline-none"
         placeholder="Buscar medicamentos"
@@ -18,18 +31,25 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, onSearch }) => {
         value={query}
         onChangeText={setQuery}
         onSubmitEditing={() => {
-          onSearch(); // Ejecuta la búsqueda al presionar "Enter"
-          Keyboard.dismiss(); // Oculta el teclado después de buscar
+          onSearch();
+          Keyboard.dismiss();
         }}
       />
 
-      {/* Si hay texto, mostrar la "X", si no, mostrar la bandera */}
+      {/* Botón de micrófono */}
+      {hasRecognitionSupport && (
+        <TouchableOpacity onPress={isListening ? stopListening : startListening}>
+          <Ionicons name={isListening ? "mic-off" : "mic"} size={20} color="gray" />
+        </TouchableOpacity>
+      )}
+
+      {/* Botón para limpiar el campo de búsqueda */}
       {query.length > 0 ? (
-        <TouchableOpacity onPress={() => setQuery('')}>
+        <TouchableOpacity onPress={() => setQuery("")}>
           <Ionicons name="close" size={20} color="gray" />
         </TouchableOpacity>
       ) : (
-        <Text className="ml-2 text-lg">🇪🇸</Text> // Bandera de España en emoji
+        <Text className="ml-2 text-lg">🇪🇸</Text>
       )}
     </View>
   );
