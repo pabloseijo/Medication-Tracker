@@ -161,14 +161,36 @@ export default function HomeScreen() {
     }
   };
 
-  // Elimina un medicamento de la lista
-  const removeMedicine = (meal: MealType, med: string) => {
+// Convertimos la función a async para poder usar await
+const removeMedicine = async (meal: MealType, med: string) => {
+  try {
+    // 1. Llamamos a la API con método DELETE, pasando el nombre como query param
+    const response = await fetch(`http://localhost:8000/sporadic/delete?name=${encodeURIComponent(med)}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // No enviamos body, ya que el endpoint recibe el parámetro en la query
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al eliminar medicamento: ${response.status} - ${errorText}`);
+    }
+
+    console.log("✅ Medicamento eliminado correctamente en la API.");
+
+    // 2. Eliminamos el medicamento de la lista local
     setMedsTaken((prev) => {
       const newMeds = { ...prev };
       delete newMeds[meal][med];
       return newMeds;
     });
-  };
+  } catch (error) {
+    console.error("❌ Error al eliminar el medicamento:", error);
+  }
+};
+
 
   // Función para cambiar el estado de los medicamentos
   const toggleMedicine = (meal: MealType, med: string) => {
