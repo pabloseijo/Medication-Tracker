@@ -2,6 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.crud.messages import add_message, get_all_user_conversation
 from app.database import get_database
+from app.main import CURRENT_USER_EMAIL
 from app.schemas.messages import ChatMessage
 from app.services.chatbot import ChatbotService
 
@@ -20,7 +21,7 @@ async def process_message(
     Envía un mensaje al chatbot y devuelve la respuesta.
     """
     try:
-        mock_user = await db.users.find_one({"email": "javier@gmail.com"})
+        mock_user = await db.users.find_one({"email": CURRENT_USER_EMAIL})
         if not mock_user:
             return None
         # Se añade el mensaje a la base de datos
@@ -30,7 +31,7 @@ async def process_message(
         conversation_history = await get_all_user_conversation(db.messages, message.user_id)
 
         chatbot_response = chatbot_service.get_chat_response(
-            "Mock", conversation_history
+            mock_user["name"], conversation_history
         )
 
         # Verificar si la respuesta es None
