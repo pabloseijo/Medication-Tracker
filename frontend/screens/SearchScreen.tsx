@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
@@ -29,8 +29,10 @@ const SearchScreen = () => {
   };
 
   // 🔎 Llamada a la API para obtener información del medicamento
-  const fetchMedData = async () => {
-    if (!query.trim()) return;
+  const fetchMedData = async (searchQuery?: string) => {
+    const searchTerm = searchQuery || query; // Usa el argumento si está disponible, sino usa `query`
+    
+    if (!searchTerm.trim()) return;
 
     setLoading(true);
     setMedData(null);
@@ -38,7 +40,7 @@ const SearchScreen = () => {
     setSearched(false); // Resetear el estado antes de buscar
 
     try {
-      const response = await fetch(`http://localhost:8000/med_name?name=${query}`);
+      const response = await fetch(`http://localhost:8000/med_name?name=${searchTerm}`);
       const data = await response.json();
       setMedData(data);
     } catch (error) {
@@ -77,7 +79,7 @@ const SearchScreen = () => {
           <SuggestionsList 
           className="bg-white p-3 rounded-lg shadow-md border border-gray-200"
           suggestions={suggestions} 
-          onSelect={(name) => {setQuery(name); fetchMedData()}} />
+          onSelect={(name) => {setQuery(name); fetchMedData(name)}} />
         </View>
       )}
 
