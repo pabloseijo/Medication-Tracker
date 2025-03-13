@@ -11,21 +11,23 @@ import {
   CheckBox,
   Button,
 } from "@ui-kitten/components";
+import { DateData } from "react-native-calendars"; // Para tipar loadItemsForDay
 
 interface MedicineFormProps {
   isVisible: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void>; 
+  loadItemsForDay: (day: DateData) => Promise<void>;
   selectedMeal: string;
-  selectedDate: any;
+  selectedDate: Date; // Suponemos que aquí ya es un objeto Date
 }
 
 export default function MedicineForm({
   isVisible,
   onClose,
-  onSave,
+  loadItemsForDay,
   selectedMeal,
-  selectedDate
+  selectedDate,
 }: MedicineFormProps) {
   const [medicineType, setMedicineType] = useState<"sporadic" | "treatment">("sporadic");
   const [sporadicName, setSporadicName] = useState("");
@@ -40,40 +42,70 @@ export default function MedicineForm({
     cena: false,
   });
 
-  const saveMedicine = () => {
-    const validSporadicDose = sporadicDose ? parseInt(sporadicDose, 10) : 1;
-  
-    const data =
-      medicineType === "sporadic"
-        ? {
-            name: sporadicName.trim() || "Medicamento Desconocido",
-            cantidad: isNaN(validSporadicDose) ? 1 : validSporadicDose,
-            moments: [
-              selectedMeal === "desayuno", // Ahora es una lista y no un objeto
-              selectedMeal === "comida",
-              selectedMeal === "cena",
-            ],
-            inicio: selectedDate.toISOString(),
-            duration_days: 1,
-          }
-        : {
-            name: treatmentName.trim() || "Tratamiento Desconocido",
-            cantidad: parseInt(treatmentDose) || 1,
-            moments: [
-              treatmentMeals.desayuno,
-              treatmentMeals.comida,
-              treatmentMeals.cena,
-            ], // ✅ Ahora es una lista de booleanos
-            inicio: treatmentStartDate.toISOString(),
-            duration_days: parseInt(treatmentDuration) || 1,
-          };
-  
-    console.log("📤 Enviando datos corregidos al backend:", JSON.stringify(data, null, 2));
-    onSave(data);
-    onClose();
+  // Función para guardar el medicamento (y hacer el fetch)
+  const handleSave = async () => {
+    try {
+      const validSporadicDose = sporadicDose ? parseInt(sporadicDose, 10) : 1;
+
+      const data =
+        medicineType === "sporadic"
+          ? {
+              name: sporadicName.trim() || "Medicamento Desconocido",
+              cantidad: isNaN(validSporadicDose) ? 1 : validSporadicDose,
+              moments: [
+                selectedMeal === "desayuno",
+                selectedMeal === "comida",
+                selectedMeal === "cena",
+              ],
+              inicio: selectedDate.toISOString(),
+              duration_days: 1,
+            }
+          : {
+              name: treatmentName.trim() || "Tratamiento Desconocido",
+              cantidad: parseInt(treatmentDose) || 1,
+              moments: [
+                treatmentMeals.desayuno,
+                treatmentMeals.comida,
+                treatmentMeals.cena,
+              ],
+              inicio: treatmentStartDate.toISOString(),
+              duration_days: parseInt(treatmentDuration) || 1,
+            };
+
+      console.log("📡 Enviando petición a la API con datos:", JSON.stringify(data, null, 2));
+
+      // 1. Hacemos el fetch para POST
+      const response = await fetch("http://localhost:8000/sporadic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error en la API: ${response.status} - ${errorText}`);
+      }
+
+      console.log("✅ Medicamento guardado correctamente.");
+
+      // 2. Simular un "day press" con selectedDate
+      await loadItemsForDay({
+        dateString: selectedDate.toISOString().split("T")[0],
+        year: selectedDate.getFullYear(),
+        month: selectedDate.getMonth() + 1,
+        day: selectedDate.getDate(),
+        timestamp: selectedDate.getTime(),
+      });
+
+      // 3. Cerrar el modal
+      onClose();
+    } catch (error) {
+      console.error("❌ Error al guardar el medicamento:", error);
+    }
   };
-  
-  
+
   return (
     <Modal
       visible={isVisible}
@@ -86,9 +118,7 @@ export default function MedicineForm({
         </Text>
         <RadioGroup
           selectedIndex={medicineType === "sporadic" ? 0 : 1}
-          onChange={(index) =>
-            setMedicineType(index === 0 ? "sporadic" : "treatment")
-          }
+          onChange={(index) => setMedicineType(index === 0 ? "sporadic" : "treatment")}
           style={{ marginBottom: 20 }}
         >
           <Radio>Toma Esporádica</Radio>
@@ -183,7 +213,7 @@ export default function MedicineForm({
           </>
         )}
 
-        <Button onPress={saveMedicine}>Guardar</Button>
+        <Button onPress={handleSave}>Guardar</Button>
       </Card>
     </Modal>
   );
