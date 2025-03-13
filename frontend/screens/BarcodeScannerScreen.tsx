@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { ScrollView } from "react-native-gesture-handler";
+import MedicineForm from "../components/MedicineForm"; // Importamos el formulario
 
 export default function BarcodeScannerScreen() {
   const videoRef = useRef(null);
   const [scannedCode, setScannedCode] = useState(null);
   const [error, setError] = useState(null);
   const [medData, setMedData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [medName, setMedName] = useState(""); // Estado para el nombre del medicamento
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
@@ -74,19 +76,22 @@ export default function BarcodeScannerScreen() {
       if (!response.ok) throw new Error("Error en la respuesta del servidor");
       const data = await response.json();
       setMedData(data);
+      setMedName(data.nombre || ""); // Guardar el nombre del medicamento
     } catch (err) {
       setError("Error obteniendo datos del medicamento: " + err.message);
     }
   };
 
+  const handleSave = (data) => {
+    console.log("✅ Medicamento guardado:", data);
+    setIsModalOpen(false); // Cerrar el modal después de guardar
+  };
+
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100">
-      {/* 🔹 Contenedor fijo para el título y la cámara */}
+      {/* 🔹 Escáner */}
       <div className="flex flex-col items-center justify-center flex-none h-auto sticky top-0 bg-gray-100 z-10">
-        {/* 🔹 Título */}
         <h2 className="text-xl font-bold mt-8 mb-4">Escáner de Código de Barras</h2>
-  
-        {/* 🔹 Contenedor del video */}
         <div className="relative w-4/5 max-w-md flex items-center justify-center">
           <video
             ref={videoRef}
@@ -95,17 +100,15 @@ export default function BarcodeScannerScreen() {
           />
         </div>
       </div>
-  
-      {/* 🔹 Sección de información con scroll */}
+
+      {/* 🔹 Sección de información */}
       <div className="flex-grow overflow-y-auto px-4 pt-4">
-        {/* 🔹 Código escaneado */}
         {scannedCode && (
           <p className="mb-4 p-2 bg-green-200 text-green-800 rounded text-lg font-semibold">
             Código Escaneado: {scannedCode}
           </p>
         )}
-  
-        {/* 🔹 Datos del medicamento */}
+
         {medData && (
           <div className="mb-16 p-4 bg-blue-200 text-blue-800 rounded-lg text-lg font-semibold shadow">
             <p><strong>Medicamento:</strong> {medData.nombre}</p>
@@ -120,16 +123,33 @@ export default function BarcodeScannerScreen() {
                 Ficha Técnica
               </a>
             </p>
+
+            <button
+            onClick={() => setIsModalOpen(true)}
+            className="w-full bg-blue-800 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition"
+            >
+              Añadir al formulario
+            </button>
           </div>
         )}
-  
-        {/* 🔹 Mensaje de error */}
+
         {error && (
           <p className="mt-4 p-2 bg-red-200 text-red-800 rounded text-lg font-semibold">
             Error: {error}
           </p>
         )}
       </div>
+
+      {/* 🔹 Modal de `MedicineForm` */}
+      {isModalOpen && (
+        <MedicineForm 
+          isVisible={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={handleSave}
+          selectedMeal={"desayuno"} // Puedes cambiarlo dinámicamente
+          selectedDate={new Date()} // Pasa la fecha actual
+        />
+      )}
     </div>
   );
-}  
+}
