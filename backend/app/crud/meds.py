@@ -12,6 +12,15 @@ async def add_sporadic_medication(
 
     return str(result.inserted_id)
 
+async def remove_sporadic_medications(
+   collection: AsyncIOMotorCollection, medication: Medication
+) -> Optional[str]:
+    """Elimina una toma de medicamentos para el usuario asociado."""
+
+    result = await collection.delete_one(medication.model_dump())
+
+    return str(result.deleted_id)
+
 
 async def add_treatment(
     collection: AsyncIOMotorCollection, treatment: Medication
@@ -21,6 +30,16 @@ async def add_treatment(
     result = await collection.insert_one(treatment.model_dump())
 
     return str(result.inserted_id)
+
+
+async def delete_treatment(
+    collection: AsyncIOMotorCollection, treatment: Medication
+) -> Optional[str]:
+    """Elimina un tratamiento para el usuario asoaciado"""
+
+    result = await collection.delete_one(treatment.model_dump())
+
+    return str(result.deleted_id)
 
 
 async def get_all_treatments(

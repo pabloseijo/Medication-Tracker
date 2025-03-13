@@ -77,8 +77,52 @@ async def create_treatment(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
+@meds_router.delete("/treatments/delete", status_code=status.HTTP_200_OK)
+async def delete_treatment(
+    treatment: Medication,
+    db: AsyncIOMotorCollection = Depends(get_database),
+):
+    try:
+        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
+        if not mock_user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        treatment.user_id = mock_user["_id"]
+        result = await db.treatments.delete_one(treatment.model_dump())
+
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="No se ha podido eliminar el tratamiento")
+
+        return {"message": "Tratamiento eliminado exitosamente"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
 
 
+@meds_router.delete("/sporadic/delete", status_code=status.HTTP_200_OK)
+async def delete_sporadic_medication(
+    medication: Medication,
+    db: AsyncIOMotorCollection = Depends(get_database),
+):
+    try:
+        mock_user = await db.users.find_one({"email": "mock@ejemplo.com"})
+        if not mock_user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        medication.user_id = mock_user["_id"]
+        result = await db.sporadic_medication.delete_one(medication.model_dump())
+
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="No se ha podido eliminar la medicación")
+
+        return {"message": "Medicación esporádica eliminada exitosamente"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+     
+        
 @meds_router.get("/treatments")
 async def get_treatments(
     db: AsyncIOMotorCollection = Depends(get_database),
