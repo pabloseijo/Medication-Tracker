@@ -154,7 +154,7 @@ export default function BarcodeScannerScreen() {
           isVisible={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSave}
-          loadItemsForDay={async (day) => { /* Implement the function or pass the appropriate handler */ }}
+          loadItemsForDay={async (day) => { void day; }} // Simular la carga de medicamentos
           selectedMeal={"desayuno"}
           selectedDate={new Date()} // Pasa la fecha actual
         />

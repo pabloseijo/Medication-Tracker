@@ -251,14 +251,7 @@ export default function HomeScreen() {
     try {
       console.log("✅ Medicamento guardado correctamente.");
 
-      // 2. Simular un "day press" con selectedDate
-      await loadItemsForDay({
-        dateString: selectedDate.toISOString().split("T")[0],
-        year: selectedDate.getFullYear(),
-        month: selectedDate.getMonth() + 1,
-        day: selectedDate.getDate(),
-        timestamp: selectedDate.getTime(),
-      });
+
     } catch (error) {
       console.error("❌ Error al guardar el medicamento:", error);
     }
