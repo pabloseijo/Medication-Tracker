@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { View, Text, ActivityIndicator, ScrollView, Image } from "react-native";
 import SearchBar from "../components/SearchBar";
 import SuggestionsList from "../components/SuggestionsList";
-import BarCodeSearch from "components/BarCodeSearch";
+import MedicineForm from "../components/MedicineForm";
 
 const SearchScreen = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [medData, setMedData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   // 🟢 Llamada a la API para obtener sugerencias (autocompletado)
   const fetchSuggestions = async (text: string) => {
@@ -45,6 +47,11 @@ const SearchScreen = () => {
     setLoading(false);
   };
 
+  const handleSave = (data) => {
+    console.log("✅ Medicamento guardado:", data);
+    setIsModalOpen(false); // Cerrar el modal después de guardar
+  };
+
   return (
     <View className="flex-1 p-6 bg-gray-50 space-y-6">
       <View className="w-full">
@@ -76,28 +83,47 @@ const SearchScreen = () => {
         {medData && medData.map((medicamento, index) => (
           <View 
             key={index} 
-            className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300 flex-row items-center"
+            className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300  items-center"
           >
-            {/* Contenido de texto */}
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-blue-900">💊 {medicamento.nombre}</Text>
-              <Text className="text-gray-600 mt-2">🏭 <Text className="font-semibold">Laboratorio:</Text> {medicamento.labtitular}</Text>
-              <Text className="text-gray-600 mt-1">📝 <Text className="font-semibold">Vía de administración:</Text> {medicamento.viasAdministracion[0]?.nombre}</Text>
-              <Text className="text-gray-600 mt-1">🏷️ <Text className="font-semibold">Forma farmacéutica:</Text> {medicamento.formaFarmaceutica?.nombre}</Text>
-              <Text className="text-gray-600 mt-1">🔹 <Text className="font-semibold">Dosis:</Text> {medicamento.dosis}</Text>
-              <Text className="text-gray-600 mt-1">📜 <Text className="font-semibold">Prescripción:</Text> {medicamento.cpresc}</Text>
-            </View>
+            <Text className="text-xl font-bold text-blue-900">💊 {medicamento.nombre}</Text>
+            <View className="flex-row">
+              {/* Contenido de texto */}
+              <View className="flex-1">
+                <Text className="text-gray-600 mt-2">🏭 <Text className="font-semibold">Laboratorio:</Text> {medicamento.labtitular}</Text>
+                <Text className="text-gray-600 mt-1">📝 <Text className="font-semibold">Vía de administración:</Text> {medicamento.viasAdministracion[0]?.nombre}</Text>
+                <Text className="text-gray-600 mt-1">🏷️ <Text className="font-semibold">Forma farmacéutica:</Text> {medicamento.formaFarmaceutica?.nombre}</Text>
+                <Text className="text-gray-600 mt-1">🔹 <Text className="font-semibold">Dosis:</Text> {medicamento.dosis}</Text>
+                <Text className="text-gray-600 mt-1">📜 <Text className="font-semibold">Prescripción:</Text> {medicamento.cpresc}</Text>
+                <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-blue-800 text-white font-bold mt-4 py-2 px-4 rounded hover:bg-blue-600 transition"
+                >
+                  Añadir al formulario
+                </button>
+              </View>
 
-            {/* Imagen del medicamento */}
-            {medicamento.fotos?.[0]?.url && (
-              <Image 
-                source={{ uri: medicamento.fotos[0].url }} 
-                className="w-20 h-20 ml-4 rounded-lg border border-gray-300"
-                resizeMode="contain"
-              />
-            )}
+              {/* Imagen del medicamento */}
+              {medicamento.fotos?.[0]?.url && (
+                <Image 
+                  source={{ uri: medicamento.fotos[0].url }} 
+                  className="w-20 h-20 ml-4 rounded-lg border border-gray-300"
+                  resizeMode="contain"
+                />
+              )}
+            </View>
           </View>
         ))}
+
+              {/* 🔹 Modal de `MedicineForm` */}
+      {isModalOpen && (
+        <MedicineForm 
+          isVisible={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={handleSave}
+          selectedMeal={"desayuno"}
+          selectedDate={new Date()} // Pasa la fecha actual
+        />
+      )}
 
         {/* Mensaje de error si no se encuentra el medicamento */}
         {!loading && medData === null && query !== "" && (

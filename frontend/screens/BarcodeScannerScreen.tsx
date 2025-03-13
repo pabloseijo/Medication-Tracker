@@ -75,11 +75,21 @@ export default function BarcodeScannerScreen() {
       const response = await fetch(`http://localhost:8000/meds?code=${code}`);
       if (!response.ok) throw new Error("Error en la respuesta del servidor");
       const data = await response.json();
+      
+      // 🔹 Extraer la primera palabra del nombre
+      const firstWord = data.nombre ? data.nombre.split(" ")[0] : "";
+  
       setMedData(data);
       setMedName(data.nombre || ""); // Guardar el nombre del medicamento
     } catch (err) {
       setError("Error obteniendo datos del medicamento: " + err.message);
     }
+  };
+  
+
+  const handleSave = (data) => {
+    console.log("✅ Medicamento guardado:", data);
+    setIsModalOpen(false); // Cerrar el modal después de guardar
   };
 
   const handleSave = (data) => {
@@ -146,7 +156,7 @@ export default function BarcodeScannerScreen() {
           isVisible={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSave}
-          selectedMeal={"desayuno"} // Puedes cambiarlo dinámicamente
+          selectedMeal={"desayuno"}
           selectedDate={new Date()} // Pasa la fecha actual
         />
       )}
