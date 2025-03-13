@@ -80,12 +80,17 @@ export default function BarcodeScannerScreen() {
       const firstWord = data.nombre ? data.nombre.split(" ")[0] : "";
   
       setMedData(data);
-      setMedName(firstWord); // 🔹 Guardar solo la primera palabra
+      setMedName(data.nombre || ""); // Guardar el nombre del medicamento
     } catch (err) {
       setError("Error obteniendo datos del medicamento: " + err.message);
     }
   };
   
+
+  const handleSave = (data) => {
+    console.log("✅ Medicamento guardado:", data);
+    setIsModalOpen(false); // Cerrar el modal después de guardar
+  };
 
   const handleSave = (data) => {
     console.log("✅ Medicamento guardado:", data);
