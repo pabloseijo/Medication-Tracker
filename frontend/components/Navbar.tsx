@@ -28,7 +28,7 @@ export default function Navbar() {
               iconName = "magnify";
             } else if (route.name === "Perfil") {
                 iconName = "account";
-            } else if (route.name === "BarcodeScanner") {
+            } else if (route.name === "Cámara") {
               iconName = "barcode-scan";
             } else if (route.name === "Chatbot") {
               iconName = "chat";
@@ -44,7 +44,7 @@ export default function Navbar() {
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Buscar" component={SearchScreen} />
         <Tab.Screen name="Perfil" component={UserScreen} />
-        <Tab.Screen name="BarcodeScanner" component={BarcodeScannerScreen} />
+        <Tab.Screen name="Cámara" component={BarcodeScannerScreen} />
         <Tab.Screen name="Chatbot" component={ChatScreen} />
       </Tab.Navigator>
     </NavigationContainer>
