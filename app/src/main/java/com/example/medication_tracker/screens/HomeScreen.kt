@@ -86,8 +86,16 @@ fun MealCard(
     onRemoveMed: (MealType, String) -> Unit,
     onAddMed: () -> Unit
 ) {
-    Card(modifier = Modifier.padding(8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Text(text = meal.name, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
             meds.forEach { (med, taken) ->
