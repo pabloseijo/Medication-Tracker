@@ -15,6 +15,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+
 
 @Composable
 fun StatsOverview(
@@ -26,7 +30,15 @@ fun StatsOverview(
     if (medsTotal == 0) return // Sin datos
 
     val remainingMeds = medsTotal - medsTaken
-    val progressPercent = (progress * 100).toInt()
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(
+            durationMillis = 600, // Ajusta según gusto
+            easing = FastOutSlowInEasing
+        ),
+        label = "progressAnimation"
+    )
+    val progressPercent = (animatedProgress * 100).toInt()
 
     Card(
         modifier = Modifier
@@ -51,7 +63,7 @@ fun StatsOverview(
                 // Progreso circular
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
-                        progress = progress,
+                        progress = animatedProgress,
                         color = Color(0xFF4CAF50),
                         strokeWidth = 8.dp,
                         modifier = Modifier.size(90.dp)
