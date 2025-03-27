@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -98,14 +100,17 @@ fun MealCard(
         ) {
             Text(text = meal.name, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
-            meds.forEach { (med, taken) ->
+            val medList = remember(meds) { meds.entries.toList() }
+
+            medList.forEach { (med, taken) ->
                 MedicineCard(
                     name = med,
                     taken = taken,
-                    onClick = { onToggleMed(meal, med) },
+                    onToggleTaken = { onToggleMed(meal, med) },
                     onDelete = { onRemoveMed(meal, med) }
                 )
             }
+
             Button(onClick = onAddMed, modifier = Modifier.padding(top = 8.dp)) {
                 Text("+ Añadir Medicamento")
             }
