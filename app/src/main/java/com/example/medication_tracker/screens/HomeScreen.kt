@@ -80,6 +80,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
     }
 }
 
+
 @Composable
 fun MealCard(
     meal: MealType,
@@ -88,6 +89,9 @@ fun MealCard(
     onRemoveMed: (MealType, String) -> Unit,
     onAddMed: () -> Unit
 ) {
+    // Este trigger fuerza recomposición cuando eliminamos un ítem
+    var recomposeTrigger by remember { mutableStateOf(0) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -100,15 +104,20 @@ fun MealCard(
         ) {
             Text(text = meal.name, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
-            val medList = remember(meds) { meds.entries.toList() }
 
-            medList.forEach { (med, taken) ->
-                MedicineCard(
-                    name = med,
-                    taken = taken,
-                    onToggleTaken = { onToggleMed(meal, med) },
-                    onDelete = { onRemoveMed(meal, med) }
-                )
+            meds.entries.forEach { (med, taken) ->
+                // Clave única para forzar redibujado
+                key(med + recomposeTrigger) {
+                    MedicineCard(
+                        name = med,
+                        taken = taken,
+                        onToggleTaken = { onToggleMed(meal, med) },
+                        onDelete = {
+                            onRemoveMed(meal, med)
+                            recomposeTrigger++ // 👈 fuerza la UI a redibujarse sin esperar
+                        }
+                    )
+                }
             }
 
             Button(onClick = onAddMed, modifier = Modifier.padding(top = 8.dp)) {
@@ -117,6 +126,7 @@ fun MealCard(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
