@@ -12,13 +12,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-
+import androidx.compose.ui.draw.clip
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
+import androidx.compose.foundation.lazy.items
+import java.time.YearMonth
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 @Composable
 fun StatsOverview(
@@ -27,7 +38,6 @@ fun StatsOverview(
     medsTotal: Int,
     topMeds: List<Pair<String, Int>>
 ) {
-    if (medsTotal == 0) return // Sin datos
 
     val remainingMeds = medsTotal - medsTaken
     val animatedProgress by animateFloatAsState(
