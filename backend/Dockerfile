@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 ENV PIPENV_VENV_IN_PROJECT=1 
 
-COPY Pipfile Pipfile.lock ./
+COPY ./Pipfile ./Pipfile.lock ./
 
 RUN pip install pipenv && pipenv install 
 
